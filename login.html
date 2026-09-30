@@ -1,14 +1,178 @@
-<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login — HunarSetu</title><link rel="stylesheet" href="styles.css"></head><body>
-<main class="wrap"><form class="auth card" id="f" novalidate><h1>Login</h1>
-<label for="email">Email</label><input id="email" type="email" autocomplete="email" required>
-<label for="pw">Password (min 8 characters)</label><input id="pw" type="password" autocomplete="current-password" minlength="8" required>
-<p class="err" id="err" role="alert"></p><button class="btn" id="go">Login</button>
-<p>New here? <a href="register.html">Create an account</a> · <a href="forgot-password.html">Forgot password?</a></p></form></main>
-<script type="module">
-import{renderChrome,auth,db,A,F,getRole,home,toast}from"./js/app.js";renderChrome();
-const f=document.getElementById("f"),err=document.getElementById("err"),go=document.getElementById("go");
-const msg=e=>({"auth/invalid-credential":"Wrong email or password.","auth/email-already-in-use":"This email is already registered. Try logging in.","auth/weak-password":"Password must be at least 8 characters."}[e.code]||"Something went wrong. Please try again.");
-f.onsubmit=async ev=>{ev.preventDefault();err.textContent="";const email=f.email.value.trim(),pw=f.pw.value;
- if(!/^\S+@\S+\.\S+$/.test(email)||pw.length<8){err.textContent="Enter a valid email and a password of at least 8 characters.";return}
- go.disabled=true;try{const c=await A.signInWithEmailAndPassword(auth,email,pw);location.href=home(await getRole(c.user))}catch(e){err.textContent=msg(e);go.disabled=false}};
-</script></body></html>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login — HunarSetu</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <main class="wrap">
+    <form class="auth card" id="f" novalidate>
+      <h1>Login</h1>
+
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+        required
+      >
+
+      <label for="pw">Password</label>
+      <input
+        id="pw"
+        type="password"
+        autocomplete="current-password"
+        minlength="8"
+        required
+      >
+
+      <p class="err" id="err" role="alert"></p>
+
+      <button class="btn" id="go" type="submit">
+        Login
+      </button>
+
+      <p>
+        New here?
+        <a href="register.html">Create an account</a>
+        ·
+        <a href="forgot-password.html">Forgot password?</a>
+      </p>
+    </form>
+  </main>
+
+  <script type="module">
+    import {
+      renderChrome,
+      auth,
+      db,
+      A,
+      F,
+      getRole,
+      home
+    } from "./app.js";
+
+    renderChrome();
+
+    const form = document.getElementById("f");
+    const errorBox = document.getElementById("err");
+    const submitBtn = document.getElementById("go");
+
+    function errorMessage(error) {
+      const messages = {
+        "auth/invalid-credential":
+          "Email ya password galat hai.",
+
+        "auth/user-not-found":
+          "Is email se account nahi mila.",
+
+        "auth/wrong-password":
+          "Password galat hai.",
+
+        "auth/invalid-email":
+          "Valid email address enter karo.",
+
+        "auth/too-many-requests":
+          "Bahut attempts hue hain. Thodi der baad try karo.",
+
+        "auth/network-request-failed":
+          "Internet connection check karo.",
+
+        "permission-denied":
+          "Firestore permission issue hai. Firebase Rules check karo."
+      };
+
+      return messages[error.code] ||
+        error.message ||
+        "Login nahi ho paya. Dobara try karo.";
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      errorBox.textContent = "";
+
+      const email =
+        document.getElementById("email").value.trim();
+
+      const password =
+        document.getElementById("pw").value;
+
+      if (!email || !password) {
+        errorBox.textContent =
+          "Email aur password dono enter karo.";
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Logging in...";
+
+      try {
+        // 1. Firebase Authentication login
+        const credential =
+          await A.signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+
+        const user = credential.user;
+
+        // 2. Check whether Firestore profile exists
+        const userRef = F.doc(db, "users", user.uid);
+        const userSnap = await F.getDoc(userRef);
+
+        let role;
+
+        if (userSnap.exists()) {
+          role = userSnap.data().role;
+        } else {
+          // Registration may have created Auth account
+          // but failed to save the Firestore profile.
+          const guessedName =
+            user.displayName ||
+            (user.email ? user.email.split("@")[0] : "Customer");
+
+          const name =
+            guessedName.trim().length >= 2
+              ? guessedName.trim()
+              : "Customer";
+
+          role = "customer";
+
+          await F.setDoc(userRef, {
+            uid: user.uid,
+            name: name,
+            email: user.email,
+            role: role,
+            emailVerified: user.emailVerified,
+            createdAt: F.serverTimestamp()
+          });
+        }
+
+        // 3. Validate role
+        if (!["customer", "worker", "admin"].includes(role)) {
+          throw new Error(
+            "Account role valid nahi hai. Support se contact karo."
+          );
+        }
+
+        // 4. Redirect
+        location.href = home(role);
+
+      } catch (error) {
+        console.error("Login error:", error);
+
+        errorBox.textContent =
+          errorMessage(error);
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Login";
+      }
+    });
+  </script>
+</body>
+</html>

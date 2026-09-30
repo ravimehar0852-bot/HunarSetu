@@ -178,15 +178,17 @@
 
         // 4. Redirect to the appropriate page
         location.href = home(role);
+} catch (error) {
+  console.error("Registration error:", error);
 
-      } catch (error) {
-        console.error("Registration error:", error);
+  errorBox.textContent =
+    "Error: " +
+    (error.code || "unknown") +
+    " — " +
+    (error.message || "Please try again.");
 
-        errorBox.textContent =
-          getErrorMessage(error);
-
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Create account";
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Create account";
       }
     });
   </script>

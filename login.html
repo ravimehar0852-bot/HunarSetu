@@ -1,0 +1,14 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login — HunarSetu</title><link rel="stylesheet" href="styles.css"></head><body>
+<main class="wrap"><form class="auth card" id="f" novalidate><h1>Login</h1>
+<label for="email">Email</label><input id="email" type="email" autocomplete="email" required>
+<label for="pw">Password (min 8 characters)</label><input id="pw" type="password" autocomplete="current-password" minlength="8" required>
+<p class="err" id="err" role="alert"></p><button class="btn" id="go">Login</button>
+<p>New here? <a href="register.html">Create an account</a> · <a href="forgot-password.html">Forgot password?</a></p></form></main>
+<script type="module">
+import{renderChrome,auth,db,A,F,getRole,home,toast}from"./js/app.js";renderChrome();
+const f=document.getElementById("f"),err=document.getElementById("err"),go=document.getElementById("go");
+const msg=e=>({"auth/invalid-credential":"Wrong email or password.","auth/email-already-in-use":"This email is already registered. Try logging in.","auth/weak-password":"Password must be at least 8 characters."}[e.code]||"Something went wrong. Please try again.");
+f.onsubmit=async ev=>{ev.preventDefault();err.textContent="";const email=f.email.value.trim(),pw=f.pw.value;
+ if(!/^\S+@\S+\.\S+$/.test(email)||pw.length<8){err.textContent="Enter a valid email and a password of at least 8 characters.";return}
+ go.disabled=true;try{const c=await A.signInWithEmailAndPassword(auth,email,pw);location.href=home(await getRole(c.user))}catch(e){err.textContent=msg(e);go.disabled=false}};
+</script></body></html>

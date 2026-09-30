@@ -1,81 +1,396 @@
-<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HunarSetu — Local Skills. Local Work. Local Growth.</title><meta name="description" content="Find skilled local professionals in Jhalawar, Rajasthan and book services with confidence.">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css"></head><body>
-<main><section class="hero"><div class="wrap"><h1>Apne Shehar Ka Bharosemand Kaamgar, Ab Ek Jagah.</h1>
-<p>Find skilled local professionals, compare services, book appointments, and get your work done with confidence.</p>
-<form class="search" action="workers.html" role="search"><input name="q" placeholder="Service, worker name or skill" aria-label="Search">
-<select name="city" aria-label="Location"><option>Jhalawar, Rajasthan</option></select><button class="btn gold">Search</button></form>
-<a class="btn gold" href="workers.html">Find Workers</a> <a class="btn ghost" style="color:#fff" href="register.html?role=worker">Become a Worker</a></div></section>
-<section class="blk"><div class="wrap"><h2>Service categories</h2><div class="grid" id="cats"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div></div></section>
-<section class="blk"><div class="wrap"><h2>Professionals in Jhalawar</h2><div class="grid" id="ws"><div class="skel"></div></div></div></section></main>
-<script type="module">
-<script type="module">
-import { renderChrome, db, F, inr } from "./app.js";
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-renderChrome();
+  <title>HunarSetu — Local Skills. Local Work. Local Growth.</title>
 
-const cats = document.getElementById("cats");
-const ws = document.getElementById("ws");
+  <meta name="description" content="Find skilled local professionals in Jhalawar, Rajasthan. Discover services, compare workers and book appointments with HunarSetu.">
 
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;"
-}[c]));
+  <meta name="theme-color" content="#115E59">
 
-try {
-  const c = await F.getDocs(
-    F.query(
-      F.collection(db, "serviceCategories"),
-      F.where("active", "==", true),
-      F.orderBy("order"),
-      F.limit(24)
-    )
-  );
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  cats.innerHTML = c.empty
-    ? '<p class="empty">Abhi categories add nahi hui hain.</p>'
-    : c.docs.map(d => `
-        <a class="card cat" href="workers.html?cat=${d.id}">
-          <span>${esc(d.data().icon || "🛠️")}</span>
-          ${esc(d.data().name)}
-        </a>
-      `).join("");
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  const w = await F.getDocs(
-    F.query(
-      F.collection(db, "workerProfiles"),
-      F.where("status", "==", "approved"),
-      F.limit(12)
-    )
-  );
+  <link rel="stylesheet" href="styles.css">
+</head>
 
-  ws.innerHTML = w.empty
-    ? '<div class="empty card">Abhi koi professional nahi hai. <a href="register.html?role=worker">Worker registration karein</a>.</div>'
-    : w.docs.map(d => {
-        const x = d.data();
-        return `
-          <a class="card cat" href="profile.html?id=${d.id}">
-            ${esc(x.name)}
-            <br>
-            <small>${esc(x.locality || "")} · From ${inr(x.startingPrice || 0)}</small>
+<body>
+
+  <!-- NAVIGATION: app.js will render the navbar here -->
+  <div id="site-header"></div>
+
+  <main>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <div class="wrap">
+
+        <span class="hero-badge">
+          HunarSetu · Jhalawar, Rajasthan
+        </span>
+
+        <h1>
+          Apne Shehar Ka Bharosemand Kaamgar,
+          Ab Ek Jagah.
+        </h1>
+
+        <p>
+          Find skilled local professionals, compare services,
+          book appointments, and get your work done with confidence.
+        </p>
+
+        <!-- SEARCH FORM -->
+        <form class="search" id="searchForm" role="search">
+
+          <input
+            type="search"
+            id="searchInput"
+            name="q"
+            placeholder="Service, worker name or skill"
+            aria-label="Search for a service or worker"
+          >
+
+          <select
+            id="citySelect"
+            name="city"
+            aria-label="Select location"
+          >
+            <option value="Jhalawar">Jhalawar, Rajasthan</option>
+          </select>
+
+          <button type="submit" class="btn gold">
+            Search
+          </button>
+
+        </form>
+
+        <div class="hero-actions">
+          <a class="btn gold" href="workers.html">
+            Find Workers
           </a>
+
+          <a class="btn ghost" href="register.html?role=worker">
+            Become a Worker
+          </a>
+        </div>
+
+        <div class="hero-note">
+          Discover local services in one place.
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- SERVICE CATEGORIES -->
+    <section class="blk">
+      <div class="wrap">
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Explore services</span>
+            <h2>Service Categories</h2>
+            <p>Find the right professional for your needs.</p>
+          </div>
+
+          <a href="workers.html" class="text-link">
+            View all services →
+          </a>
+        </div>
+
+        <div class="grid" id="cats">
+          <div class="skel"></div>
+          <div class="skel"></div>
+          <div class="skel"></div>
+          <div class="skel"></div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- WORKERS -->
+    <section class="blk">
+      <div class="wrap">
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Local professionals</span>
+            <h2>Professionals in Jhalawar</h2>
+            <p>Explore available service professionals.</p>
+          </div>
+
+          <a href="workers.html" class="text-link">
+            View all workers →
+          </a>
+        </div>
+
+        <div class="grid" id="ws">
+          <div class="skel"></div>
+          <div class="skel"></div>
+          <div class="skel"></div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- HOW IT WORKS -->
+    <section class="blk">
+      <div class="wrap">
+
+        <span class="eyebrow">Simple and convenient</span>
+        <h2>How HunarSetu Works</h2>
+
+        <div class="grid">
+
+          <article class="card">
+            <div class="step-number">01</div>
+            <h3>Search</h3>
+            <p>
+              Search for the service or professional you need.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="step-number">02</div>
+            <h3>Choose a Professional</h3>
+            <p>
+              Explore profiles, skills, experience and pricing.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="step-number">03</div>
+            <h3>Book a Service</h3>
+            <p>
+              Contact a professional and arrange your service.
+            </p>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- WORKER CTA -->
+    <section class="blk">
+      <div class="wrap">
+
+        <div class="card worker-cta">
+          <div>
+            <span class="eyebrow">For local professionals</span>
+            <h2>Apna Hunar Duniya Ko Dikhayein</h2>
+            <p>
+              Create your professional profile and help more
+              customers discover your services.
+            </p>
+          </div>
+
+          <a class="btn gold" href="register.html?role=worker">
+            Join as a Worker
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- TRUST & SAFETY -->
+    <section class="blk">
+      <div class="wrap">
+
+        <h2>Your Trust Matters</h2>
+
+        <p>
+          Check a professional's profile and service details
+          before arranging a booking. Always confirm the final
+          price, timing and scope of work directly.
+        </p>
+
+        <p>
+          Verification status will be displayed only when
+          the relevant verification process has been completed.
+        </p>
+
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER: app.js will render the footer here -->
+  <div id="site-footer"></div>
+
+
+  <!-- APPLICATION SCRIPT -->
+  <script type="module">
+    import {
+      renderChrome,
+      db,
+      F,
+      inr
+    } from "./app.js";
+
+    const cats = document.getElementById("cats");
+    const ws = document.getElementById("ws");
+
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+    const citySelect = document.getElementById("citySelect");
+
+    const esc = (value) =>
+      String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[char]));
+
+    // SEARCH
+    searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const query = searchInput.value.trim();
+      const city = citySelect.value;
+
+      const params = new URLSearchParams();
+
+      if (query) params.set("q", query);
+      if (city) params.set("city", city);
+
+      window.location.href =
+        "workers.html" + (params.toString() ? "?" + params.toString() : "");
+    });
+
+
+    // NAVIGATION AND FOOTER
+    try {
+      renderChrome();
+    } catch (error) {
+      console.error("Navigation error:", error);
+    }
+
+
+    // LOAD SERVICE CATEGORIES AND WORKERS
+    async function loadHomepage() {
+      try {
+
+        const categoryQuery = F.query(
+          F.collection(db, "serviceCategories"),
+          F.where("active", "==", true),
+          F.orderBy("order"),
+          F.limit(24)
+        );
+
+        const categorySnapshot = await F.getDocs(categoryQuery);
+
+        if (categorySnapshot.empty) {
+          cats.innerHTML = `
+            <div class="empty card">
+              <h3>Services Coming Soon</h3>
+              <p>
+                Service categories will appear here once they
+                are added by the administrator.
+              </p>
+            </div>
+          `;
+        } else {
+          cats.innerHTML = categorySnapshot.docs.map((doc) => {
+            const category = doc.data();
+
+            return `
+              <a
+                class="card cat"
+                href="workers.html?cat=${encodeURIComponent(doc.id)}"
+              >
+                <span class="category-icon">
+                  ${esc(category.icon || "🛠️")}
+                </span>
+
+                <h3>${esc(category.name || "Service")}</h3>
+              </a>
+            `;
+          }).join("");
+        }
+
+
+        const workerQuery = F.query(
+          F.collection(db, "workerProfiles"),
+          F.where("status", "==", "approved"),
+          F.limit(12)
+        );
+
+        const workerSnapshot = await F.getDocs(workerQuery);
+
+        if (workerSnapshot.empty) {
+          ws.innerHTML = `
+            <div class="empty card">
+              <h3>No Professionals Yet</h3>
+              <p>
+                Be among the first professionals to join HunarSetu.
+              </p>
+
+              <a href="register.html?role=worker" class="btn gold">
+                Register as a Worker
+              </a>
+            </div>
+          `;
+        } else {
+          ws.innerHTML = workerSnapshot.docs.map((doc) => {
+            const worker = doc.data();
+
+            const price = Number(worker.startingPrice || 0);
+
+            return `
+              <a
+                class="card cat worker-card"
+                href="profile.html?id=${encodeURIComponent(doc.id)}"
+              >
+                <div class="worker-card-icon">👤</div>
+
+                <h3>${esc(worker.name || "Professional")}</h3>
+
+                <p>${esc(worker.locality || "Jhalawar")}</p>
+
+                <p>
+                  Starting from
+                  <strong>${esc(inr(price))}</strong>
+                </p>
+
+                <span class="text-link">View Profile →</span>
+              </a>
+            `;
+          }).join("");
+        }
+
+      } catch (error) {
+        console.error("Homepage data error:", error);
+
+        cats.innerHTML = `
+          <div class="empty card">
+            <h3>Services Could Not Load</h3>
+            <p>Please check the Firebase configuration and database.</p>
+          </div>
         `;
-      }).join("");
 
-} catch (e) {
-  console.error("HunarSetu loading error:", e);
+        ws.innerHTML = `
+          <div class="empty card">
+            <h3>Workers Could Not Load</h3>
+            <p>Please try again later.</p>
+          </div>
+        `;
+      }
+    }
 
-  cats.innerHTML = ws.innerHTML =
-    '<p class="empty">Data load nahi hua. Firebase configuration check karein.</p>';
-}
-</script>
-const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-try{const c=await F.getDocs(F.query(F.collection(db,"serviceCategories"),F.where("active","==",true),F.orderBy("order"),F.limit(24)));
- cats.innerHTML=c.empty?'<p class="empty">Categories will appear once the admin adds them.</p>':c.docs.map(d=>`<a class="card cat" href="workers.html?cat=${d.id}"><span>${esc(d.data().icon||"🛠️")}</span>${esc(d.data().name)}</a>`).join("");
- const w=await F.getDocs(F.query(F.collection(db,"workerProfiles"),F.where("status","==","approved"),F.limit(12)));
- ws.innerHTML=w.empty?'<div class="empty card">No professionals have joined yet. <a href="register.html?role=worker">Register as a worker</a> to be the first.</div>':w.docs.map(d=>{const x=d.data();return`<a class="card cat" href="worker-profile.html?id=${d.id}">${esc(x.name)}<br><small>${esc(x.locality)} · from ${inr(x.startingPrice||0)}</small></a>`}).join("")
-}catch(e){cats.innerHTML=ws.innerHTML='<p class="empty">Could not load data. Check Firebase config and try again.</p>'}
-</script></body></html>
+    loadHomepage();
+  </script>
+
+</body>
+  </html>

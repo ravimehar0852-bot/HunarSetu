@@ -132,14 +132,13 @@ export async function getRole(user) {
 
 export const home = (role) => {
   const destinations = {
-    admin: "/admin/dashboard.html",
-    worker: "/worker/dashboard.html",
-    customer: "/customer/dashboard.html"
+    admin: "/index.html",
+    worker: "/join.html",
+    customer: "/index.html"
   };
 
-  return destinations[role] || "/register.html";
+  return destinations[role] || "/index.html";
 };
-
 
 // ===============================
 // NAVBAR CSS

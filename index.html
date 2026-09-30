@@ -1,10 +1,20 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HunarSetu – Local Skills. Local Work. Local Growth.</title><meta name="description" content="HunarSetu: Local Skills. Local Work. Local Growth. Frontend demo."><link rel="stylesheet" href="css/styles.css"><script src="js/data.js" defer></script><script src="js/app.js" defer></script></head><body data-page="home"><main id="main">
-<section class="hero"><span class="pill">Jhalawar, Rajasthan · Demo prototype</span><h1>Apne Shehar Ka Bharosemand Kaamgar, Ab Ek Jagah.</h1><p class="mut">Discover skilled local workers near you, from electricians to tutors. HunarSetu is a bridge between local talent and local customers.</p><form class="search" id="heroSearch" role="search"><input name="q" aria-label="Search for a service" placeholder="Kaunsa kaam karwana hai?"><button class="btn">Search</button></form></section>
-<section class="sec wrap"><h2>Browse by service</h2><div class="grid cats" id="cats"></div></section>
-<section class="sec wrap"><h2>Featured demo profiles</h2><p class="mut">Fictional examples of how local workers will appear.</p><div class="grid" id="featured"></div></section>
-<section class="sec wrap"><h2>How it works</h2><div class="grid"><div class="card"><h3>1. Search</h3><p class="mut">Type the work you need or pick a service.</p></div><div class="card"><h3>2. View profile</h3><p class="mut">See skills, experience, locality and languages.</p></div><div class="card"><h3>3. Contact</h3><p class="mut">Reach out directly. Contact is a placeholder in this demo.</p></div></div></section>
-<section class="sec wrap"><h2>Why HunarSetu</h2><div class="split"><div class="card"><h3>For customers</h3><p class="mut">Find nearby skills in one place, compare profiles, and see indicative prices upfront.</p></div><div class="card"><h3>For workers</h3><p class="mut">Show your work and skills online so more people in your city can find you.</p></div></div></section>
-<section class="sec wrap"><div class="notice"><h3>Trust and safety</h3><p style="margin:0">Profiles in this demo are fictional and <b>not verified</b>. Verification, reviews and reporting will be designed before real listings go live.</p></div></section>
-<section class="sec wrap"><h2>What people might say</h2><div class="grid"><div class="card"><span class="tag">Sample / demo content</span><p>“Sample testimonial text showing where customer feedback will appear.”</p></div><div class="card"><span class="tag">Sample / demo content</span><p>“Sample testimonial text showing where worker feedback will appear.”</p></div></div></section>
-<section class="sec wrap faq"><h2>FAQ</h2><div id="faq"></div></section>
-</main></body></html>
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HunarSetu — Local Skills. Local Work. Local Growth.</title><meta name="description" content="Find skilled local professionals in Jhalawar, Rajasthan and book services with confidence.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css"></head><body>
+<main><section class="hero"><div class="wrap"><h1>Apne Shehar Ka Bharosemand Kaamgar, Ab Ek Jagah.</h1>
+<p>Find skilled local professionals, compare services, book appointments, and get your work done with confidence.</p>
+<form class="search" action="workers.html" role="search"><input name="q" placeholder="Service, worker name or skill" aria-label="Search">
+<select name="city" aria-label="Location"><option>Jhalawar, Rajasthan</option></select><button class="btn gold">Search</button></form>
+<a class="btn gold" href="workers.html">Find Workers</a> <a class="btn ghost" style="color:#fff" href="register.html?role=worker">Become a Worker</a></div></section>
+<section class="blk"><div class="wrap"><h2>Service categories</h2><div class="grid" id="cats"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div></div></section>
+<section class="blk"><div class="wrap"><h2>Professionals in Jhalawar</h2><div class="grid" id="ws"><div class="skel"></div></div></div></section></main>
+<script type="module">
+import{renderChrome,db,F,inr}from"./js/app.js";renderChrome();
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+try{const c=await F.getDocs(F.query(F.collection(db,"serviceCategories"),F.where("active","==",true),F.orderBy("order"),F.limit(24)));
+ cats.innerHTML=c.empty?'<p class="empty">Categories will appear once the admin adds them.</p>':c.docs.map(d=>`<a class="card cat" href="workers.html?cat=${d.id}"><span>${esc(d.data().icon||"🛠️")}</span>${esc(d.data().name)}</a>`).join("");
+ const w=await F.getDocs(F.query(F.collection(db,"workerProfiles"),F.where("status","==","approved"),F.limit(12)));
+ ws.innerHTML=w.empty?'<div class="empty card">No professionals have joined yet. <a href="register.html?role=worker">Register as a worker</a> to be the first.</div>':w.docs.map(d=>{const x=d.data();return`<a class="card cat" href="worker-profile.html?id=${d.id}">${esc(x.name)}<br><small>${esc(x.locality)} · from ${inr(x.startingPrice||0)}</small></a>`}).join("")
+}catch(e){cats.innerHTML=ws.innerHTML='<p class="empty">Could not load data. Check Firebase config and try again.</p>'}
+</script></body></html>

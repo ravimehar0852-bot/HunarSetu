@@ -1,15 +1,195 @@
-<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create account — HunarSetu</title><link rel="stylesheet" href="styles.css"></head><body>
-<main class="wrap"><form class="auth card" id="f" novalidate><h1>Create account</h1><label for="name">Full name</label><input id="name" required minlength="2"><label for="role">I am a</label><select id="role"><option value="customer">Customer</option><option value="worker">Service professional</option></select>
-<label for="email">Email</label><input id="email" type="email" autocomplete="email" required>
-<label for="pw">Password (min 8 characters)</label><input id="pw" type="password" autocomplete="new-password" minlength="8" required>
-<p class="err" id="err" role="alert"></p><button class="btn" id="go">Create account</button>
-<p>Already registered? <a href="login.html">Login</a></p></form></main>
-<script type="module">
-import{renderChrome,auth,db,A,F,getRole,home,toast}from"./js/app.js";renderChrome();
-const f=document.getElementById("f"),err=document.getElementById("err"),go=document.getElementById("go");
-const msg=e=>({"auth/invalid-credential":"Wrong email or password.","auth/email-already-in-use":"This email is already registered. Try logging in.","auth/weak-password":"Password must be at least 8 characters."}[e.code]||"Something went wrong. Please try again.");
-f.onsubmit=async ev=>{ev.preventDefault();err.textContent="";const email=f.email.value.trim(),pw=f.pw.value;
- if(!/^\S+@\S+\.\S+$/.test(email)||pw.length<8){err.textContent="Enter a valid email and a password of at least 8 characters.";return}
- go.disabled=true;try{const q=new URLSearchParams(location.search);if(q.get("role")==="worker")document.getElementById("role").value="worker";const role=document.getElementById("role").value,name=document.getElementById("name").value.trim();if(name.length<2)throw{code:"x"};const c=await A.createUserWithEmailAndPassword(auth,email,pw);
- await F.setDoc(F.doc(db,"users",c.user.uid),{name,email,role,createdAt:F.serverTimestamp()});await A.sendEmailVerification(c.user);location.href=home(role)}catch(e){err.textContent=msg(e);go.disabled=false}};
-</script></body></html>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Create Account — HunarSetu</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <main class="wrap">
+    <form class="auth card" id="f" novalidate>
+
+      <h1>Create account</h1>
+      <p>Create your HunarSetu account</p>
+
+      <label for="name">Full name</label>
+      <input
+        id="name"
+        type="text"
+        autocomplete="name"
+        minlength="2"
+        required
+      >
+
+      <label for="role">I am a</label>
+      <select id="role" required>
+        <option value="customer">Customer</option>
+        <option value="worker">Service professional</option>
+      </select>
+
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+        required
+      >
+
+      <label for="pw">Password (minimum 8 characters)</label>
+      <input
+        id="pw"
+        type="password"
+        autocomplete="new-password"
+        minlength="8"
+        required
+      >
+
+      <p class="err" id="err" role="alert"></p>
+
+      <button class="btn" id="go" type="submit">
+        Create account
+      </button>
+
+      <p>
+        Already registered?
+        <a href="login.html">Login</a>
+      </p>
+
+    </form>
+  </main>
+
+  <script type="module">
+    import {
+      renderChrome,
+      auth,
+      db,
+      A,
+      F,
+      home
+    } from "./app.js";
+
+    renderChrome();
+
+    const form = document.getElementById("f");
+    const errorBox = document.getElementById("err");
+    const submitBtn = document.getElementById("go");
+
+    // Show readable Firebase errors
+    function getErrorMessage(error) {
+      const messages = {
+        "auth/email-already-in-use":
+          "This email is already registered. Please log in.",
+
+        "auth/invalid-email":
+          "Please enter a valid email address.",
+
+        "auth/weak-password":
+          "Password must be at least 8 characters.",
+
+        "auth/network-request-failed":
+          "Network error. Please check your internet connection.",
+
+        "auth/operation-not-allowed":
+          "Email/password registration is disabled in Firebase.",
+
+        "permission-denied":
+          "Database permission denied. Please check Firestore rules."
+      };
+
+      return messages[error.code] ||
+        "Something went wrong. Please try again.";
+    }
+
+    // Respect worker role when redirected from a worker signup link
+    const params = new URLSearchParams(location.search);
+
+    if (params.get("role") === "worker") {
+      document.getElementById("role").value = "worker";
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      errorBox.textContent = "";
+
+      const name =
+        document.getElementById("name").value.trim();
+
+      const email =
+        document.getElementById("email").value.trim();
+
+      const password =
+        document.getElementById("pw").value;
+
+      const role =
+        document.getElementById("role").value;
+
+      // Basic validation
+      if (name.length < 2) {
+        errorBox.textContent =
+          "Please enter your full name.";
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errorBox.textContent =
+          "Please enter a valid email address.";
+        return;
+      }
+
+      if (password.length < 8) {
+        errorBox.textContent =
+          "Password must be at least 8 characters.";
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Creating account...";
+
+      try {
+        // 1. Create Firebase Authentication account
+        const credential =
+          await A.createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+
+        const user = credential.user;
+
+        // 2. Save basic user details in Firestore
+        await F.setDoc(
+          F.doc(db, "users", user.uid),
+          {
+            uid: user.uid,
+            name: name,
+            email: email,
+            role: role,
+            emailVerified: false,
+            createdAt: F.serverTimestamp()
+          }
+        );
+
+        // 3. Send email verification
+        await A.sendEmailVerification(user);
+
+        // 4. Redirect to the appropriate page
+        location.href = home(role);
+
+      } catch (error) {
+        console.error("Registration error:", error);
+
+        errorBox.textContent =
+          getErrorMessage(error);
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Create account";
+      }
+    });
+  </script>
+
+</body>
+</html>

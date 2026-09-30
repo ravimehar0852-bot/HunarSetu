@@ -10,7 +10,68 @@
 <section class="blk"><div class="wrap"><h2>Service categories</h2><div class="grid" id="cats"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div></div></section>
 <section class="blk"><div class="wrap"><h2>Professionals in Jhalawar</h2><div class="grid" id="ws"><div class="skel"></div></div></div></section></main>
 <script type="module">
-import{renderChrome,db,F,inr}from"./js/app.js";renderChrome();
+<script type="module">
+import { renderChrome, db, F, inr } from "./app.js";
+
+renderChrome();
+
+const cats = document.getElementById("cats");
+const ws = document.getElementById("ws");
+
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;"
+}[c]));
+
+try {
+  const c = await F.getDocs(
+    F.query(
+      F.collection(db, "serviceCategories"),
+      F.where("active", "==", true),
+      F.orderBy("order"),
+      F.limit(24)
+    )
+  );
+
+  cats.innerHTML = c.empty
+    ? '<p class="empty">Abhi categories add nahi hui hain.</p>'
+    : c.docs.map(d => `
+        <a class="card cat" href="workers.html?cat=${d.id}">
+          <span>${esc(d.data().icon || "🛠️")}</span>
+          ${esc(d.data().name)}
+        </a>
+      `).join("");
+
+  const w = await F.getDocs(
+    F.query(
+      F.collection(db, "workerProfiles"),
+      F.where("status", "==", "approved"),
+      F.limit(12)
+    )
+  );
+
+  ws.innerHTML = w.empty
+    ? '<div class="empty card">Abhi koi professional nahi hai. <a href="register.html?role=worker">Worker registration karein</a>.</div>'
+    : w.docs.map(d => {
+        const x = d.data();
+        return `
+          <a class="card cat" href="profile.html?id=${d.id}">
+            ${esc(x.name)}
+            <br>
+            <small>${esc(x.locality || "")} · From ${inr(x.startingPrice || 0)}</small>
+          </a>
+        `;
+      }).join("");
+
+} catch (e) {
+  console.error("HunarSetu loading error:", e);
+
+  cats.innerHTML = ws.innerHTML =
+    '<p class="empty">Data load nahi hua. Firebase configuration check karein.</p>';
+}
+</script>
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 try{const c=await F.getDocs(F.query(F.collection(db,"serviceCategories"),F.where("active","==",true),F.orderBy("order"),F.limit(24)));
  cats.innerHTML=c.empty?'<p class="empty">Categories will appear once the admin adds them.</p>':c.docs.map(d=>`<a class="card cat" href="workers.html?cat=${d.id}"><span>${esc(d.data().icon||"🛠️")}</span>${esc(d.data().name)}</a>`).join("");

@@ -1,5 +1,9 @@
-// Paste your Firebase Web App config (Firebase Console > Project settings > Your apps). These values are public by design; security comes from firestore.rules.
 export const firebaseConfig = {
-  apiKey: "YOUR_API_KEY", authDomain: "YOUR_PROJECT.firebaseapp.com", projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com", messagingSenderId: "YOUR_SENDER_ID", appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCOgh7hMQMM-O5WWpf729Lb9967z4P9pTA",
+  authDomain: "hunarsetu-9eb1b.firebaseapp.com",
+  projectId: "hunarsetu-9eb1b",
+  storageBucket: "hunarsetu-9eb1b.firebasestorage.app",
+  messagingSenderId: "708666421105",
+  appId: "1:708666421105:web:1cc4d169c580dc8552d0d0",
+  measurementId: "G-QQVD8RVT15"
 };

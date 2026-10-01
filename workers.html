@@ -1,3 +1,437 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Find a Worker – HunarSetu</title><meta name="description" content="HunarSetu: Local Skills. Local Work. Local Growth. Frontend demo."><link rel="stylesheet" href="css/styles.css"><script src="js/data.js" defer></script><script src="js/app.js" defer></script></head><body data-page="workers"><main id="main">
-<div class="wrap sec"><h1>Find a Worker</h1><p class="mut">All listings are sample <b>Demo Profiles</b>, not real people.</p><div class="filters"><input id="q" type="search" placeholder="Service, name or locality" aria-label="Search by service, name or locality"><select id="area" aria-label="Locality"></select><select id="sort" aria-label="Sort by"><option value="rel">Relevance</option><option value="name">Name (A–Z)</option></select></div><div class="chips" id="chips" role="group" aria-label="Categories"></div><p class="mut" id="count" role="status"></p><div class="grid" id="grid"></div></div>
-</main></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Workers – HunarSetu</title>
+  <meta name="description" content="Find verified, approved local service professionals on HunarSetu.">
+  <link rel="stylesheet" href="./styles.css">
+
+  <style>
+    .workers-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 35px 18px 60px;
+    }
+
+    .workers-hero {
+      padding: 28px 0;
+    }
+
+    .workers-hero h1 {
+      font-size: clamp(30px, 5vw, 46px);
+      margin: 0 0 12px;
+    }
+
+    .workers-hero p {
+      color: #64748b;
+      line-height: 1.7;
+    }
+
+    .worker-filters {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+      margin: 24px 0 18px;
+    }
+
+    .worker-filters input,
+    .worker-filters select {
+      width: 100%;
+      min-width: 0;
+      padding: 13px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: white;
+      color: #0f172a;
+      font: inherit;
+    }
+
+    .worker-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin: 18px 0;
+    }
+
+    .worker-chip {
+      border: 1px solid #cbd5e1;
+      background: white;
+      color: #334155;
+      padding: 9px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .worker-chip.active {
+      background: #0f766e;
+      color: white;
+      border-color: #0f766e;
+    }
+
+    .workers-count {
+      color: #64748b;
+      margin: 18px 0;
+    }
+
+    .workers-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .worker-card {
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 5px 22px rgba(15, 23, 42, .05);
+      min-width: 0;
+    }
+
+    .worker-card h2 {
+      font-size: 21px;
+      margin: 0 0 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .worker-skill {
+      display: inline-block;
+      background: #ccfbf1;
+      color: #115e59;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .worker-detail {
+      margin: 9px 0;
+      color: #475569;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .worker-contact {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .worker-contact a {
+      flex: 1;
+      text-align: center;
+      padding: 11px 8px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      background: #0f766e;
+      color: white;
+    }
+
+    .worker-contact a.secondary {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .workers-empty {
+      padding: 30px 18px;
+      text-align: center;
+      border: 1px dashed #cbd5e1;
+      border-radius: 16px;
+      color: #64748b;
+      background: white;
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 800px) {
+      .workers-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .worker-filters {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .worker-filters input {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .workers-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .worker-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .worker-filters input {
+        grid-column: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="site-header"></div>
+
+  <main class="workers-page">
+    <section class="workers-hero">
+      <h1>Find a Worker</h1>
+      <p>
+        Find local service professionals in your area.
+        Search by name, skill, or location.
+      </p>
+    </section>
+
+    <section aria-label="Search and filters">
+      <div class="worker-filters">
+        <input
+          id="workerSearch"
+          type="search"
+          placeholder="Search name, service or area..."
+          aria-label="Search workers"
+        >
+
+        <select id="workerArea" aria-label="Filter by area">
+          <option value="">All areas</option>
+        </select>
+
+        <select id="workerSort" aria-label="Sort workers">
+          <option value="relevance">Default order</option>
+          <option value="name">Name (A–Z)</option>
+        </select>
+      </div>
+
+      <div class="worker-chips" id="workerChips">
+        <button class="worker-chip active" data-skill="">
+          All Services
+        </button>
+      </div>
+    </section>
+
+    <p class="workers-count" id="workersCount" role="status">
+      Loading approved workers...
+    </p>
+
+    <section
+      class="workers-grid"
+      id="workersGrid"
+      aria-label="Approved workers"
+    ></section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script type="module">
+    import {
+      db,
+      F,
+      renderChrome
+    } from "./app.js";
+
+    renderChrome();
+
+    const searchInput = document.getElementById("workerSearch");
+    const areaSelect = document.getElementById("workerArea");
+    const sortSelect = document.getElementById("workerSort");
+    const chips = document.getElementById("workerChips");
+    const grid = document.getElementById("workersGrid");
+    const count = document.getElementById("workersCount");
+
+    let workers = [];
+    let selectedSkill = "";
+
+    function safe(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function phoneNumber(value) {
+      return String(value ?? "").replace(/[^\d+]/g, "");
+    }
+
+    function showEmpty(message) {
+      grid.innerHTML = "";
+      const empty = document.createElement("div");
+      empty.className = "workers-empty";
+      empty.textContent = message;
+      grid.appendChild(empty);
+    }
+
+    function buildFilters() {
+      const areas = [...new Set(
+        workers
+          .map(worker => String(worker.area || worker.city || "").trim())
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b));
+
+      areaSelect.innerHTML =
+        '<option value="">All areas</option>' +
+        areas.map(area =>
+          `<option value="${safe(area)}">${safe(area)}</option>`
+        ).join("");
+
+      const skills = [...new Set(
+        workers
+          .map(worker => String(worker.skill || "").trim())
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b));
+
+      chips.innerHTML = `
+        <button class="worker-chip active" data-skill="">
+          All Services
+        </button>
+        ${skills.map(skill => `
+          <button class="worker-chip" data-skill="${safe(skill)}">
+            ${safe(skill)}
+          </button>
+        `).join("")}
+      `;
+    }
+
+    function renderWorkers() {
+      const search = searchInput.value.trim().toLowerCase();
+      const area = areaSelect.value;
+
+      let filtered = workers.filter(worker => {
+        const searchable = [
+          worker.name,
+          worker.skill,
+          worker.area,
+          worker.city,
+          worker.description,
+          worker.experience
+        ].join(" ").toLowerCase();
+
+        const matchesSearch = searchable.includes(search);
+        const matchesArea =
+          !area || (worker.area || worker.city || "") === area;
+        const matchesSkill =
+          !selectedSkill || worker.skill === selectedSkill;
+
+        return matchesSearch && matchesArea && matchesSkill;
+      });
+
+      if (sortSelect.value === "name") {
+        filtered.sort((a, b) =>
+          String(a.name || "").localeCompare(String(b.name || ""))
+        );
+      }
+
+      count.textContent =
+        `${filtered.length} approved worker${filtered.length === 1 ? "" : "s"} found`;
+
+      if (!filtered.length) {
+        showEmpty(
+          workers.length
+            ? "No workers match your search. Try another service or area."
+            : "No approved workers are available yet. Please check again later."
+        );
+        return;
+      }
+
+      grid.innerHTML = filtered.map(worker => {
+        const phone = phoneNumber(worker.phone);
+        const location = [worker.area, worker.city]
+          .filter(Boolean)
+          .join(", ");
+
+        return `
+          <article class="worker-card">
+            <span class="worker-skill">
+              ${safe(worker.skill || "Local Service")}
+            </span>
+
+            <h2>${safe(worker.name || "Service Professional")}</h2>
+
+            <p class="worker-detail">
+              <strong>Location:</strong>
+              ${safe(location || "Not specified")}
+            </p>
+
+            <p class="worker-detail">
+              <strong>Experience:</strong>
+              ${safe(worker.experience || "Not specified")}
+            </p>
+
+            <p class="worker-detail">
+              ${safe(worker.description || "Local service professional.")}
+            </p>
+
+            ${phone ? `
+              <div class="worker-contact">
+                <a href="tel:${safe(phone)}">Call Worker</a>
+                <a
+                  class="secondary"
+                  href="https://wa.me/${safe(phone.replace(/\D/g, ""))}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >WhatsApp</a>
+              </div>
+            ` : ""}
+          </article>
+        `;
+      }).join("");
+    }
+
+    chips.addEventListener("click", event => {
+      const button = event.target.closest("[data-skill]");
+      if (!button) return;
+
+      selectedSkill = button.dataset.skill;
+
+      chips.querySelectorAll(".worker-chip").forEach(chip => {
+        chip.classList.toggle("active", chip === button);
+      });
+
+      renderWorkers();
+    });
+
+    searchInput.addEventListener("input", renderWorkers);
+    areaSelect.addEventListener("change", renderWorkers);
+    sortSelect.addEventListener("change", renderWorkers);
+
+    async function loadWorkers() {
+      count.textContent = "Loading approved workers...";
+      grid.innerHTML = "";
+
+      try {
+        const result = await F.getDocs(
+          F.query(
+            F.collection(db, "workerProfiles"),
+            F.where("status", "==", "approved")
+          )
+        );
+
+        workers = result.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        buildFilters();
+        renderWorkers();
+
+      } catch (error) {
+        console.error("Workers load error:", error);
+        count.textContent = "Unable to load workers.";
+        showEmpty(
+          "Could not load workers. Please refresh the page and try again."
+        );
+      }
+    }
+
+    loadWorkers();
+  </script>
+</body>
+  </html>
+  

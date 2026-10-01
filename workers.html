@@ -1,11 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Find Workers – HunarSetu</title>
-  <meta name="description" content="Find verified, approved local service professionals on HunarSetu.">
+  <meta
+    name="description"
+    content="Find local service professionals in Jhalawar on HunarSetu."
+  >
+
   <link rel="stylesheet" href="./styles.css">
 
   <style>
@@ -40,6 +44,7 @@
     .worker-filters select {
       width: 100%;
       min-width: 0;
+      box-sizing: border-box;
       padding: 13px 14px;
       border: 1px solid #cbd5e1;
       border-radius: 12px;
@@ -88,6 +93,29 @@
       padding: 20px;
       box-shadow: 0 5px 22px rgba(15, 23, 42, .05);
       min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .worker-photo {
+      display: block;
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      background: #f1f5f9;
+    }
+
+    .worker-avatar {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: #ccfbf1;
+      color: #115e59;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      margin-bottom: 16px;
     }
 
     .worker-card h2 {
@@ -111,17 +139,17 @@
       margin: 9px 0;
       color: #475569;
       line-height: 1.5;
-      overflow-wrap: anywhere;
     }
 
     .worker-contact {
       display: flex;
-      gap: 10px;
+      flex-wrap: wrap;
+      gap: 9px;
       margin-top: 18px;
     }
 
     .worker-contact a {
-      flex: 1;
+      flex: 1 1 100px;
       text-align: center;
       padding: 11px 8px;
       border-radius: 10px;
@@ -129,18 +157,19 @@
       font-weight: 700;
       background: #0f766e;
       color: white;
+      box-sizing: border-box;
     }
 
     .worker-contact a.secondary {
       background: #f1f5f9;
       color: #0f172a;
-      
     }
 
     .worker-contact a.booking-btn {
-  background: #7c3aed;
-  color: white;
-      }
+      background: #7c3aed;
+      color: white;
+    }
+
     .workers-empty {
       padding: 30px 18px;
       text-align: center;
@@ -186,8 +215,8 @@
 
   <main class="workers-page">
     <section class="workers-hero">
-      <h1>Find a Worker</h1>
-      <p>
+      <h1 id="workersHeading">Find a Worker</h1>
+      <p id="workersDescription">
         Find local service professionals in your area.
         Search by name, skill, or location.
       </p>
@@ -239,34 +268,142 @@
       renderChrome
     } from "./app.js";
 
-    renderChrome();
-
     const searchInput = document.getElementById("workerSearch");
     const areaSelect = document.getElementById("workerArea");
     const sortSelect = document.getElementById("workerSort");
     const chips = document.getElementById("workerChips");
     const grid = document.getElementById("workersGrid");
     const count = document.getElementById("workersCount");
+    const heading = document.getElementById("workersHeading");
+    const description = document.getElementById("workersDescription");
+
+    const params = new URLSearchParams(window.location.search);
 
     let workers = [];
     let selectedSkill = "";
-    const params = new URLSearchParams(window.location.search);
-const selectedCategory = (params.get("cat") || "").toLowerCase();
+    let selectedCategory = (params.get("cat") || "").toLowerCase();
 
-const categoryNames = {
-  electrician: "electrician",
-  plumber: "plumber",
-  carpenter: "carpenter",
-  painter: "painter",
-  mechanic: "mechanic",
-  ac: "ac",
-  tailor: "tailor",
-  cleaner: "cleaner",
-  tutor: "tutor",
-  other: "other"
-};
+    // Map category IDs to names and common skills.
+    const categoryConfig = {
+      electrician: {
+        name: "Electrician",
+        keywords: [
+          "electrician",
+          "electrical",
+          "electric",
+          "wiring",
+          "wire",
+          "inverter",
+          "switchboard",
+          "geyser"
+        ]
+      },
 
-const categoryName = categoryNames[selectedCategory] || "";
+      plumber: {
+        name: "Plumber",
+        keywords: [
+          "plumber",
+          "plumbing",
+          "pipe",
+          "tap",
+          "bathroom fitting",
+          "leak",
+          "water tank"
+        ]
+      },
+
+      carpenter: {
+        name: "Carpenter",
+        keywords: [
+          "carpenter",
+          "carpentry",
+          "wood",
+          "furniture",
+          "cupboard",
+          "door",
+          "suthar"
+        ]
+      },
+
+      painter: {
+        name: "Painter",
+        keywords: [
+          "painter",
+          "painting",
+          "paint",
+          "putty",
+          "wall"
+        ]
+      },
+
+      mechanic: {
+        name: "Mechanic",
+        keywords: [
+          "mechanic",
+          "mechanical",
+          "bike",
+          "motorcycle",
+          "two-wheeler",
+          "vehicle",
+          "puncture",
+          "automobile"
+        ]
+      },
+
+      ac: {
+        name: "AC Repair",
+        keywords: [
+          "ac",
+          "a.c.",
+          "air conditioner",
+          "air conditioning",
+          "cooling",
+          "refrigeration"
+        ]
+      },
+
+      tailor: {
+        name: "Tailor",
+        keywords: [
+          "tailor",
+          "tailoring",
+          "stitching",
+          "sewing",
+          "alteration",
+          "blouse"
+        ]
+      },
+
+      cleaner: {
+        name: "Home Cleaning",
+        keywords: [
+          "cleaner",
+          "cleaning",
+          "housekeeping",
+          "deep clean",
+          "home cleaning",
+          "sanitation"
+        ]
+      },
+
+      tutor: {
+        name: "Tutor",
+        keywords: [
+          "tutor",
+          "teacher",
+          "tuition",
+          "teaching",
+          "education",
+          "maths",
+          "science"
+        ]
+      },
+
+      other: {
+        name: "Other Services",
+        keywords: []
+      }
+    };
 
     function safe(value) {
       return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -278,30 +415,92 @@ const categoryName = categoryNames[selectedCategory] || "";
       })[char]);
     }
 
+    function normalize(value) {
+      return String(value ?? "")
+        .toLowerCase()
+        .trim()
+        .replace(/[_-]+/g, " ")
+        .replace(/\s+/g, " ");
+    }
+
     function phoneNumber(value) {
       return String(value ?? "").replace(/[^\d+]/g, "");
     }
 
     function showEmpty(message) {
       grid.innerHTML = "";
+
       const empty = document.createElement("div");
       empty.className = "workers-empty";
       empty.textContent = message;
+
       grid.appendChild(empty);
+    }
+
+    function getWorkerCategory(worker) {
+      return normalize(
+        worker.categoryId ||
+        worker.category ||
+        worker.serviceCategory ||
+        worker.cat ||
+        ""
+      );
+    }
+
+    function matchesCategory(worker, categoryId) {
+      if (!categoryId) return true;
+
+      const config = categoryConfig[categoryId];
+
+      if (!config) {
+        return false;
+      }
+
+      const storedCategory = getWorkerCategory(worker);
+      const categoryName = normalize(config.name);
+      const skill = normalize(worker.skill);
+      const combined = normalize([
+        worker.skill,
+        worker.description,
+        worker.name
+      ].filter(Boolean).join(" "));
+
+      // First check the explicit category field.
+      if (
+        storedCategory === normalize(categoryId) ||
+        storedCategory === categoryName
+      ) {
+        return true;
+      }
+
+      // "Other Services" should match only an explicit category.
+      if (categoryId === "other") {
+        return false;
+      }
+
+      // Match category-specific terms against the worker's skill.
+      return config.keywords.some(keyword =>
+        skill.includes(normalize(keyword))
+      ) || (
+        categoryId === "electrician" &&
+        combined.includes("electrical")
+      );
     }
 
     function buildFilters() {
       const areas = [...new Set(
         workers
-          .map(worker => String(worker.area || worker.city || "").trim())
+          .map(worker =>
+            String(worker.area || worker.city || "").trim()
+          )
           .filter(Boolean)
       )].sort((a, b) => a.localeCompare(b));
 
       areaSelect.innerHTML =
         '<option value="">All areas</option>' +
-        areas.map(area =>
-          `<option value="${safe(area)}">${safe(area)}</option>`
-        ).join("");
+        areas.map(area => `
+          <option value="${safe(area)}">${safe(area)}</option>
+        `).join("");
 
       const skills = [...new Set(
         workers
@@ -310,11 +509,18 @@ const categoryName = categoryNames[selectedCategory] || "";
       )].sort((a, b) => a.localeCompare(b));
 
       chips.innerHTML = `
-        <button class="worker-chip active" data-skill="">
+        <button
+          class="worker-chip ${!selectedSkill ? "active" : ""}"
+          data-skill=""
+        >
           All Services
         </button>
+
         ${skills.map(skill => `
-          <button class="worker-chip" data-skill="${safe(skill)}">
+          <button
+            class="worker-chip ${selectedSkill === skill ? "active" : ""}"
+            data-skill="${safe(skill)}"
+          >
             ${safe(skill)}
           </button>
         `).join("")}
@@ -322,30 +528,42 @@ const categoryName = categoryNames[selectedCategory] || "";
     }
 
     function renderWorkers() {
-      const search = searchInput.value.trim().toLowerCase();
+      const search = normalize(searchInput.value);
       const area = areaSelect.value;
 
       let filtered = workers.filter(worker => {
-        const searchable = [
+        const searchable = normalize([
           worker.name,
           worker.skill,
           worker.area,
           worker.city,
           worker.description,
-          worker.experience
-        ].join(" ").toLowerCase();
+          worker.experience,
+          worker.category,
+          worker.categoryId,
+          worker.serviceCategory
+        ].filter(Boolean).join(" "));
 
         const matchesSearch = searchable.includes(search);
-        const matchesArea =
-          !area || (worker.area || worker.city || "") === area;
-        const matchesSkill = selectedCategory
-  ? (
-      String(worker.category || "").toLowerCase() === selectedCategory
-      || String(worker.skill || "").toLowerCase().includes(categoryName)
-    )
-  : (!selectedSkill || worker.skill === selectedSkill);
 
-        return matchesSearch && matchesArea && matchesSkill;
+        const workerArea = String(
+          worker.area || worker.city || ""
+        ).trim();
+
+        const matchesArea = !area || workerArea === area;
+
+        const matchesSelectedCategory =
+          matchesCategory(worker, selectedCategory);
+
+        const matchesSelectedSkill =
+          !selectedSkill || worker.skill === selectedSkill;
+
+        return (
+          matchesSearch &&
+          matchesArea &&
+          matchesSelectedCategory &&
+          matchesSelectedSkill
+        );
       });
 
       if (sortSelect.value === "name") {
@@ -355,12 +573,13 @@ const categoryName = categoryNames[selectedCategory] || "";
       }
 
       count.textContent =
-        `${filtered.length} approved worker${filtered.length === 1 ? "" : "s"} found`;
+        `${filtered.length} approved worker` +
+        `${filtered.length === 1 ? "" : "s"} found`;
 
       if (!filtered.length) {
         showEmpty(
           workers.length
-            ? "No workers match your search. Try another service or area."
+            ? "No workers match this service or your filters. Try another search."
             : "No approved workers are available yet. Please check again later."
         );
         return;
@@ -368,12 +587,38 @@ const categoryName = categoryNames[selectedCategory] || "";
 
       grid.innerHTML = filtered.map(worker => {
         const phone = phoneNumber(worker.phone);
-        const location = [worker.area, worker.city]
-          .filter(Boolean)
-          .join(", ");
+        const whatsappPhone = phone.replace(/\D/g, "");
+
+        const location = [
+          worker.area,
+          worker.city
+        ].filter(Boolean).join(", ");
+
+        const photo =
+          worker.photoURL ||
+          worker.photoUrl ||
+          worker.profileImage ||
+          worker.imageUrl ||
+          "";
+
+        const photoHTML = photo
+          ? `
+            <img
+              class="worker-photo"
+              src="${safe(photo)}"
+              alt="${safe(worker.name || "Worker")}"
+              loading="lazy"
+              onerror="this.style.display='none'"
+            >
+          `
+          : `
+            <div class="worker-avatar" aria-hidden="true">👤</div>
+          `;
 
         return `
           <article class="worker-card">
+            ${photoHTML}
+
             <span class="worker-skill">
               ${safe(worker.skill || "Local Service")}
             </span>
@@ -391,25 +636,37 @@ const categoryName = categoryNames[selectedCategory] || "";
             </p>
 
             <p class="worker-detail">
-              ${safe(worker.description || "Local service professional.")}
+              ${safe(
+                worker.description ||
+                "Local service professional."
+              )}
             </p>
 
             <div class="worker-contact">
-  ${phone ? `
-    <a href="tel:${safe(phone)}">Call Worker</a>
-    <a
-      class="secondary"
-      href="https://wa.me/${safe(phone.replace(/\D/g, ""))}"
-      target="_blank"
-      rel="noopener noreferrer"
-    >WhatsApp</a>
-  ` : ""}
+              ${
+                phone
+                  ? `
+                    <a href="tel:${safe(phone)}">Call Worker</a>
 
-  <a
-    class="booking-btn"
-    href="./booking.html?worker=${encodeURIComponent(worker.id)}"
-  >Book Now</a>
-</div>
+                    <a
+                      class="secondary"
+                      href="https://wa.me/${safe(whatsappPhone)}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      WhatsApp
+                    </a>
+                  `
+                  : ""
+              }
+
+              <a
+                class="booking-btn"
+                href="./booking.html?worker=${encodeURIComponent(worker.id)}"
+              >
+                Book Now
+              </a>
+            </div>
           </article>
         `;
       }).join("");
@@ -419,7 +676,15 @@ const categoryName = categoryNames[selectedCategory] || "";
       const button = event.target.closest("[data-skill]");
       if (!button) return;
 
-      selectedSkill = button.dataset.skill;
+      selectedSkill = button.dataset.skill || "";
+
+      // Selecting "All Services" clears the category URL filter too.
+      if (!selectedSkill) {
+        selectedCategory = "";
+        heading.textContent = "Find a Worker";
+        description.textContent =
+          "Find local service professionals in your area.";
+      }
 
       chips.querySelectorAll(".worker-chip").forEach(chip => {
         chip.classList.toggle("active", chip === button);
@@ -437,6 +702,17 @@ const categoryName = categoryNames[selectedCategory] || "";
       grid.innerHTML = "";
 
       try {
+        renderChrome();
+
+        if (selectedCategory && categoryConfig[selectedCategory]) {
+          heading.textContent =
+            categoryConfig[selectedCategory].name + " Professionals";
+
+          description.textContent =
+            "Explore approved professionals for this service in your area.";
+        }
+
+        // Load only approved worker profiles.
         const result = await F.getDocs(
           F.query(
             F.collection(db, "workerProfiles"),
@@ -449,12 +725,32 @@ const categoryName = categoryNames[selectedCategory] || "";
           ...doc.data()
         }));
 
+        // Read search and area filters from the URL, if provided.
+        const initialSearch = params.get("q") || "";
+        const initialCity = params.get("city") || "";
+
+        searchInput.value = initialSearch;
+
         buildFilters();
+
+        if (initialCity) {
+          const matchingArea = [...areaSelect.options].find(
+            option =>
+              normalize(option.value) === normalize(initialCity)
+          );
+
+          if (matchingArea) {
+            areaSelect.value = matchingArea.value;
+          }
+        }
+
         renderWorkers();
 
       } catch (error) {
         console.error("Workers load error:", error);
+
         count.textContent = "Unable to load workers.";
+
         showEmpty(
           "Could not load workers. Please refresh the page and try again."
         );
@@ -464,5 +760,4 @@ const categoryName = categoryNames[selectedCategory] || "";
     loadWorkers();
   </script>
 </body>
-  </html>
-  
+</html>

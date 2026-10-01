@@ -318,136 +318,181 @@
       const city = citySelect.value;
 
       const params = new URLSearchParams();
+<script type="module">
+  import {
+    renderChrome,
+    db,
+    F,
+    inr
+  } from "./app.js";
 
-      if (query) params.set("q", query);
-      if (city) params.set("city", city);
+  const cats = document.getElementById("cats");
+  const ws = document.getElementById("ws");
 
-      window.location.href =
-        "workers.html" + (params.toString() ? "?" + params.toString() : "");
-    });
+  const searchForm = document.getElementById("searchForm");
+  const searchInput = document.getElementById("searchInput");
+  const citySelect = document.getElementById("citySelect");
 
+  const esc = value =>
+    String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[char]));
 
-    // NAVIGATION AND FOOTER
-    try {
-      renderChrome();
-    } catch (error) {
-      console.error("Navigation error:", error);
+  const categories = [
+    {
+      id: "electrician",
+      name: "Electrician",
+      image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=700&q=80"
+    },
+    {
+      id: "plumber",
+      name: "Plumber",
+      image: "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?auto=format&fit=crop&w=700&q=80"
+    },
+    {
+      id: "carpenter",
+      name: "Carpenter",
+      image: "https://images.unsplash.com/photo- woodworking?auto=format&fit=crop&w=700&q=80"
+    },
+    {
+      id: "painter",
+      name: "Painter",
+      image: "https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=700&q=80"
+    },
+    {
+      id: "mechanic",
+      name: "Mechanic",
+      image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=700&q=80"
+    },
+    {
+      id: "ac",
+      name: "AC Repair",
+      image: "https://images.unsplash.com/photo-1631545806609-7c3c8f9f7a3b?auto=format&fit=crop&w=700&q=80"
+    },
+    {
+      id: "tailor",
+      name: "Tailor",
+      image: "https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=700&q=80"
+    },
+    {
+      id: "cleaner",
+      name: "Home Cleaning",
+      image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=700&q=80"
+    },
+    {
+      id: "tutor",
+      name: "Tutor",
+      image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=700&q=80"
+    },
+    {
+      id: "other",
+      name: "Other Services",
+      image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=700&q=80"
     }
+  ];
 
+  searchForm.addEventListener("submit", event => {
+    event.preventDefault();
 
-    // LOAD SERVICE CATEGORIES AND WORKERS
-    async function loadHomepage() {
-      try {
+    const params = new URLSearchParams();
+    const query = searchInput.value.trim();
+    const city = citySelect.value;
 
-        const categoryQuery = F.query(
-          F.collection(db, "serviceCategories"),
-          F.where("active", "==", true),
-          F.orderBy("order"),
-          F.limit(24)
-        );
+    if (query) params.set("q", query);
+    if (city) params.set("city", city);
 
-        const categorySnapshot = await F.getDocs(categoryQuery);
+    window.location.href =
+      "workers.html" + (params.toString() ? "?" + params : "");
+  });
 
-        if (categorySnapshot.empty) {
-          cats.innerHTML = `
-            <div class="empty card">
-              <h3>Services Coming Soon</h3>
-              <p>
-                Service categories will appear here once they
-                are added by the administrator.
-              </p>
-            </div>
-          `;
-        } else {
-          cats.innerHTML = categorySnapshot.docs.map((doc) => {
-            const category = doc.data();
+  try {
+    renderChrome();
+  } catch (error) {
+    console.error("Navigation error:", error);
+  }
 
-            return `
-              <a
-                class="card cat"
-                href="workers.html?cat=${encodeURIComponent(doc.id)}"
-              >
-                <span class="category-icon">
-                  ${esc(category.icon || "🛠️")}
-                </span>
+  function renderCategories(list) {
+    cats.innerHTML = list.map(category => `
+      <a class="service-card"
+         href="workers.html?cat=${encodeURIComponent(category.id)}">
+        <img
+          src="${esc(category.image)}"
+          alt="${esc(category.name)}"
+          loading="lazy"
+          onerror="this.style.display='none'"
+        >
+        <div class="service-card-info">
+          <h3>${esc(category.name)}</h3>
+          <p>View available professionals →</p>
+        </div>
+      </a>
+    `).join("");
+  }
 
-                <h3>${esc(category.name || "Service")}</h3>
-              </a>
-            `;
-          }).join("");
-        }
+  async function loadHomepage() {
+    // Show categories immediately, without waiting for Firebase.
+    renderCategories(categories);
 
+    try {
+      const workerQuery = F.query(
+        F.collection(db, "workerProfiles"),
+        F.where("status", "==", "approved"),
+        F.limit(12)
+      );
 
-        const workerQuery = F.query(
-          F.collection(db, "workerProfiles"),
-          F.where("status", "==", "approved"),
-          F.limit(12)
-        );
+      const workerSnapshot = await F.getDocs(workerQuery);
 
-        const workerSnapshot = await F.getDocs(workerQuery);
-
-        if (workerSnapshot.empty) {
-          ws.innerHTML = `
-            <div class="empty card">
-              <h3>No Professionals Yet</h3>
-              <p>
-                Be among the first professionals to join HunarSetu.
-              </p>
-
-              <a href="register.html?role=worker" class="btn gold">
-                Register as a Worker
-              </a>
-            </div>
-          `;
-        } else {
-          ws.innerHTML = workerSnapshot.docs.map((doc) => {
-            const worker = doc.data();
-
-            const price = Number(worker.startingPrice || 0);
-
-            return `
-              <a
-                class="card cat worker-card"
-                href="profile.html?id=${encodeURIComponent(doc.id)}"
-              >
-                <div class="worker-card-icon">👤</div>
-
-                <h3>${esc(worker.name || "Professional")}</h3>
-
-                <p>${esc(worker.locality || "Jhalawar")}</p>
-
-                <p>
-                  Starting from
-                  <strong>${esc(inr(price))}</strong>
-                </p>
-
-                <span class="text-link">View Profile →</span>
-              </a>
-            `;
-          }).join("");
-        }
-
-      } catch (error) {
-        console.error("Homepage data error:", error);
-
-        cats.innerHTML = `
-          <div class="empty card">
-            <h3>Services Could Not Load</h3>
-            <p>Please check the Firebase configuration and database.</p>
-          </div>
-        `;
-
+      if (workerSnapshot.empty) {
         ws.innerHTML = `
           <div class="empty card">
-            <h3>Workers Could Not Load</h3>
-            <p>Please try again later.</p>
+            <h3>No Professionals Yet</h3>
+            <p>Approved local professionals will appear here.</p>
+            <a href="register.html?role=worker" class="btn gold">
+              Join as a Worker
+            </a>
           </div>
         `;
+        return;
       }
+
+      ws.innerHTML = workerSnapshot.docs.map(doc => {
+        const worker = doc.data();
+        const price = Number(worker.startingPrice || 0);
+
+        return `
+          <a class="card cat worker-card"
+             href="profile.html?id=${encodeURIComponent(doc.id)}">
+            <div class="worker-card-icon">👤</div>
+            <h3>${esc(worker.name || "Professional")}</h3>
+            <p>${esc(worker.skill || "Local Service")}</p>
+            <p>${esc(worker.area || worker.city || "Jhalawar")}</p>
+            ${
+              price > 0
+                ? `<p>Starting from <strong>${esc(inr(price))}</strong></p>`
+                : ""
+            }
+            <span class="text-link">View Profile →</span>
+          </a>
+        `;
+      }).join("");
+
+    } catch (error) {
+      console.error("Homepage worker load error:", error);
+
+      ws.innerHTML = `
+        <div class="empty card">
+          <h3>Workers Could Not Load</h3>
+          <p>Please refresh the page and try again.</p>
+        </div>
+      `;
     }
+  }
 
-    loadHomepage();
-  </script>
-
+  loadHomepage();
+</script>
 </body>
   </html>

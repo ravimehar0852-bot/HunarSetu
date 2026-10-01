@@ -338,8 +338,12 @@ const categoryName = categoryNames[selectedCategory] || "";
         const matchesSearch = searchable.includes(search);
         const matchesArea =
           !area || (worker.area || worker.city || "") === area;
-        const matchesSkill =
-          !selectedSkill || worker.skill === selectedSkill;
+        const matchesSkill = selectedCategory
+  ? (
+      String(worker.category || "").toLowerCase() === selectedCategory
+      || String(worker.skill || "").toLowerCase().includes(categoryName)
+    )
+  : (!selectedSkill || worker.skill === selectedSkill);
 
         return matchesSearch && matchesArea && matchesSkill;
       });

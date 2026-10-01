@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,9 +22,7 @@
       margin-bottom: 22px;
     }
 
-    .dashboard-header h1 {
-      margin: 0;
-    }
+    .dashboard-header h1 { margin: 0; }
 
     .dashboard-btn {
       border: 0;
@@ -45,10 +42,7 @@
       cursor: not-allowed;
     }
 
-    .booking-list {
-      display: grid;
-      gap: 16px;
-    }
+    .booking-list { display: grid; gap: 16px; }
 
     .booking-card {
       background: var(--card, #fff);
@@ -66,15 +60,8 @@
       gap: 12px;
     }
 
-    .booking-card h2 {
-      font-size: 20px;
-      margin: 0 0 8px;
-    }
-
-    .booking-card p {
-      margin: 9px 0;
-      line-height: 1.5;
-    }
+    .booking-card h2 { font-size: 20px; margin: 0 0 8px; }
+    .booking-card p { margin: 9px 0; line-height: 1.5; }
 
     .booking-status {
       display: inline-block;
@@ -86,28 +73,16 @@
       color: #374151;
     }
 
-    .status-pending {
-      background: #fef3c7;
-      color: #92400e;
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-confirmed { background: #dbeafe; color: #1d4ed8; }
+    .status-rejected { background: #fee2e2; color: #b91c1c; }
+    .status-completed { background: #dcfce7; color: #166534; }
+    .status-completion_requested {
+      background: #ffedd5;
+      color: #9a3412;
     }
 
-    .status-confirmed {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
-
-    .status-rejected {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
-
-    .status-completed {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .message-box,
-    .empty-state {
+    .message-box, .empty-state {
       padding: 22px;
       border: 1px solid #ddd;
       border-radius: 14px;
@@ -122,38 +97,19 @@
       margin-top: 15px;
     }
 
-    .booking-actions button {
-      border: 0;
-    }
-
-    .muted {
-      color: #6b7280;
-      font-size: 14px;
-    }
+    .muted { color: #6b7280; font-size: 14px; }
 
     @media (max-width: 600px) {
-      .worker-dashboard {
-        padding: 12px;
-      }
-
-      .booking-card {
-        padding: 16px;
-      }
-
-      .dashboard-header {
-        align-items: stretch;
-      }
-
-      .dashboard-header .dashboard-btn {
-        text-align: center;
-      }
+      .worker-dashboard { padding: 12px; }
+      .booking-card { padding: 16px; }
+      .dashboard-header { align-items: stretch; }
+      .dashboard-header .dashboard-btn { text-align: center; }
     }
   </style>
 </head>
 
 <body>
   <main class="worker-dashboard">
-
     <header class="dashboard-header">
       <div>
         <h1>Worker Dashboard</h1>
@@ -176,17 +132,10 @@
       &nbsp; | &nbsp;
       <a href="./index.html">Home</a>
     </p>
-
   </main>
 
   <script type="module">
-    import {
-      auth,
-      db,
-      A,
-      F,
-      getRole
-    } from "./app.js";
+    import { auth, db, A, F, getRole } from "./app.js";
 
     const message = document.getElementById("message");
     const bookingList = document.getElementById("bookingList");
@@ -196,7 +145,6 @@
     let requestNumber = 0;
 
     function showMessage(text) {
-      message.replaceChildren();
       message.textContent = text;
       message.hidden = false;
     }
@@ -206,21 +154,16 @@
 
       if (typeof value === "string") {
         const parts = value.split("-");
-
-        if (parts.length === 3) {
-          return `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
-
-        return value;
+        return parts.length === 3
+          ? `${parts[2]}/${parts[1]}/${parts[0]}`
+          : value;
       }
 
       const date = typeof value.toDate === "function"
         ? value.toDate()
         : new Date(value);
 
-      if (Number.isNaN(date.getTime())) {
-        return "Not available";
-      }
+      if (Number.isNaN(date.getTime())) return "Not available";
 
       return date.toLocaleDateString("en-IN", {
         day: "numeric",
@@ -229,14 +172,22 @@
       });
     }
 
+    function statusLabel(status) {
+      const labels = {
+        pending: "Pending",
+        confirmed: "Confirmed",
+        rejected: "Rejected",
+        completion_requested: "Completion Requested — Awaiting Admin",
+        completed: "Completed"
+      };
+
+      return labels[status] || status;
+    }
+
     function addText(parent, tag, text, className = "") {
       const element = document.createElement(tag);
       element.textContent = text;
-
-      if (className) {
-        element.className = className;
-      }
-
+      if (className) element.className = className;
       parent.appendChild(element);
       return element;
     }
@@ -250,12 +201,7 @@
 
       const heading = document.createElement("div");
 
-      addText(
-        heading,
-        "h2",
-        booking.customerName || "Customer"
-      );
-
+      addText(heading, "h2", booking.customerName || "Customer");
       addText(
         heading,
         "p",
@@ -264,53 +210,18 @@
 
       const statusValue = booking.status || "pending";
       const status = document.createElement("span");
-
-      status.className =
-        "booking-status status-" + statusValue;
-
-      status.textContent =
-        statusValue.charAt(0).toUpperCase() +
-        statusValue.slice(1);
+      status.className = "booking-status status-" + statusValue;
+      status.textContent = statusLabel(statusValue);
 
       top.append(heading, status);
       card.appendChild(top);
 
-      addText(
-        card,
-        "p",
-        "Service date: " + formatDate(booking.serviceDate)
-      );
-
-      addText(
-        card,
-        "p",
-        "Customer phone: " + (booking.phone || "Not provided")
-      );
-
-      addText(
-        card,
-        "p",
-        "Customer email: " + (booking.customerEmail || "Not provided")
-      );
-
-      addText(
-        card,
-        "p",
-        "Address: " + (booking.address || "Not provided")
-      );
-
-      addText(
-        card,
-        "p",
-        "Work details: " + (booking.description || "Not provided")
-      );
-
-      addText(
-        card,
-        "p",
-        "Requested on: " + formatDate(booking.createdAt),
-        "muted"
-      );
+      addText(card, "p", "Service date: " + formatDate(booking.serviceDate));
+      addText(card, "p", "Customer phone: " + (booking.phone || "Not provided"));
+      addText(card, "p", "Customer email: " + (booking.customerEmail || "Not provided"));
+      addText(card, "p", "Address: " + (booking.address || "Not provided"));
+      addText(card, "p", "Work details: " + (booking.description || "Not provided"));
+      addText(card, "p", "Requested on: " + formatDate(booking.createdAt), "muted");
 
       const actions = document.createElement("div");
       actions.className = "booking-actions";
@@ -324,28 +235,34 @@
 
         const whatsapp = document.createElement("a");
         const number = booking.phone.replace(/\D/g, "");
-
         whatsapp.className = "dashboard-btn";
         whatsapp.href = "https://wa.me/" + number;
         whatsapp.target = "_blank";
         whatsapp.rel = "noopener noreferrer";
         whatsapp.textContent = "WhatsApp";
-
         actions.appendChild(whatsapp);
       }
 
-      if (booking.status === "pending" ||
-          booking.status === "confirmed") {
+      if (statusValue === "confirmed") {
         const completeButton = document.createElement("button");
         completeButton.type = "button";
         completeButton.className = "dashboard-btn";
-        completeButton.textContent = "Mark Completed";
+        completeButton.textContent = "Request Completion";
 
         completeButton.addEventListener("click", () => {
-          updateBookingStatus(booking.id, "completed");
+          requestCompletion(booking.id);
         });
 
         actions.appendChild(completeButton);
+      }
+
+      if (statusValue === "completion_requested") {
+        addText(
+          card,
+          "p",
+          "Your completion request has been sent. Waiting for Admin confirmation.",
+          "muted"
+        );
       }
 
       if (actions.childElementCount > 0) {
@@ -378,13 +295,11 @@
 
           const empty = document.createElement("div");
           empty.className = "empty-state";
-
           addText(
             empty,
             "p",
             "When a customer books your service, the request will appear here."
           );
-
           bookingList.appendChild(empty);
           return;
         }
@@ -416,7 +331,6 @@
               : "Could not load bookings. Please check your connection."
           );
         }
-
       } finally {
         if (thisRequest === requestNumber) {
           refreshBtn.disabled = false;
@@ -425,11 +339,11 @@
       }
     }
 
-    async function updateBookingStatus(bookingId, nextStatus) {
+    async function requestCompletion(bookingId) {
       if (!currentUser) return;
 
       const confirmed = window.confirm(
-        "Mark this booking as completed?"
+        "Kya aap confirm karte hain ki is booking ka kaam poora ho gaya hai? Isse Admin ko completion request bheji jayegi."
       );
 
       if (!confirmed) return;
@@ -450,25 +364,26 @@
           return;
         }
 
-        if (!["pending", "confirmed"].includes(booking.status)) {
-          alert("This booking can no longer be marked completed.");
+        if (booking.status !== "confirmed") {
+          alert("Only confirmed bookings can request completion.");
           return;
         }
 
         await F.updateDoc(bookingRef, {
-          status: nextStatus
+          status: "completion_requested",
+          completionRequestedAt: F.serverTimestamp()
         });
 
-        alert("Booking marked as completed.");
+        alert("Completion request sent to Admin.");
         await loadBookings(currentUser);
 
       } catch (error) {
-        console.error(error);
+        console.error("Completion request error:", error);
 
         alert(
           error.code === "permission-denied"
-            ? "You don't have permission to update this booking. Only admin can change booking status right now."
-            : "Could not update booking. Please try again."
+            ? "Firebase permission abhi update nahi hui hai. Pehle updated Firestore Rules publish karein."
+            : "Could not send request. Please try again."
         );
       }
     }
@@ -509,7 +424,6 @@
         }
 
         await loadBookings(user);
-
       } catch (error) {
         console.error(error);
         showMessage("Could not verify your account. Please try again.");
@@ -517,9 +431,7 @@
     }
 
     refreshBtn.addEventListener("click", () => {
-      if (currentUser) {
-        checkAccount(currentUser);
-      }
+      if (currentUser) checkAccount(currentUser);
     });
 
     A.onAuthStateChanged(auth, checkAccount);

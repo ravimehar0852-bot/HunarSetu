@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book a Service - HunarSetu</title>
+  <link rel="stylesheet" href="./styles.css">
+
+  <style>
+    .booking-wrap {
+      max-width: 680px;
+      margin: 35px auto;
+      padding: 20px;
+    }
+    .booking-card {
+      background: var(--card, #fff);
+      border: 1px solid #ddd;
+      border-radius: 18px;
+      padding: 24px;
+    }
+    .booking-card h1 { margin-top: 0; }
+    .booking-form { display: grid; gap: 15px; }
+    .booking-form label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .booking-form input,
+    .booking-form textarea,
+    .booking-form select {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 9px;
+      font: inherit;
+    }
+    .booking-form textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .booking-btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      background: #166534;
+      color: white;
+    }
+    .booking-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+    .worker-summary {
+      padding: 14px;
+      background: #f3f4f6;
+      color: #111827;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    #message { margin-top: 14px; }
+  </style>
+</head>
+
+<body>
+  <main class="booking-wrap">
+    <section class="booking-card">
+      <h1>Book a Service</h1>
+      <p>Fill in your details to send a service request.</p>
+
+      <div id="workerSummary" class="worker-summary">
+        Loading worker details...
+      </div>
+
+      <form id="bookingForm" class="booking-form">
+        <div>
+          <label for="customerName">Your name *</label>
+          <input id="customerName" required minlength="2"
+                 maxlength="80" autocomplete="name">
+        </div>
+
+        <div>
+          <label for="phone">Mobile number *</label>
+          <input id="phone" type="tel" required
+                 pattern="[0-9+() -]{10,18}"
+                 maxlength="18" autocomplete="tel">
+        </div>
+
+        <div>
+          <label for="address">Service address / locality *</label>
+          <input id="address" required maxlength="250"
+                 placeholder="Area, street, landmark">
+        </div>
+
+        <div>
+          <label for="serviceDate">Preferred date *</label>
+          <input id="serviceDate" type="date" required>
+        </div>
+
+        <div>
+          <label for="description">Describe the work *</label>
+          <textarea id="description" required minlength="5"
+                    maxlength="1500"
+                    placeholder="Tell the worker what work you need"></textarea>
+        </div>
+
+        <button id="submitBtn" class="booking-btn" type="submit">
+          Send Booking Request
+        </button>
+      </form>
+
+      <p id="message" role="status"></p>
+      <p><a href="./workers.html">← Back to Find Workers</a></p>
+    </section>
+  </main>
+
+  <script type="module">
+    import { auth, db, F, getRole } from "./app.js";
+
+    const params = new URLSearchParams(location.search);
+    const workerId = params.get("worker");
+
+    const summary = document.getElementById("workerSummary");
+    const form = document.getElementById("bookingForm");
+    const message = document.getElementById("message");
+    const submitBtn = document.getElementById("submitBtn");
+    const dateInput = document.getElementById("serviceDate");
+
+    let worker = null;
+
+    // Prevent selecting a past date.
+    const today = new Date();
+    const localToday = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, "0"),
+      String(today.getDate()).padStart(2, "0")
+    ].join("-");
+    dateInput.min = localToday;
+
+    function showMessage(text, isError = false) {
+      message.textContent = text;
+      message.style.color = isError ? "#b91c1c" : "#166534";
+    }
+
+    async function loadWorker() {
+      if (!workerId) {
+        summary.textContent = "Worker not selected. Please return to Find Workers.";
+        form.hidden = true;
+        return;
+      }
+
+      try {
+        const workerRef = F.doc(db, "workerProfiles", workerId);
+        const workerSnap = await F.getDoc(workerRef);
+
+        if (!workerSnap.exists() ||
+            workerSnap.data().status !== "approved") {
+          summary.textContent = "This worker is not available for booking.";
+          form.hidden = true;
+          return;
+        }
+
+        worker = workerSnap.data();
+
+        const name = document.createElement("strong");
+        name.textContent = worker.name || "Worker";
+
+        const details = document.createElement("p");
+        details.textContent = [
+          worker.skill || "Service provider",
+          worker.area || worker.city || ""
+        ].filter(Boolean).join(" • ");
+
+        summary.replaceChildren(name, details);
+      } catch (error) {
+        console.error(error);
+        summary.textContent = "Could not load worker details. Please try again.";
+        form.hidden = true;
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      showMessage("");
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending...";
+
+      try {
+        const user = auth.currentUser;
+
+        if (!user) {
+          showMessage("Please log in to book a service.", true);
+          return;
+        }
+
+        const role = await getRole(user);
+
+        if (role !== "customer") {
+          showMessage(
+            "Please log in with a customer account to book a service.",
+            true
+          );
+          return;
+        }
+
+        if (!worker) {
+          showMessage("Worker details are not available.", true);
+          return;
+        }
+
+        const customerName =
+          document.getElementById("customerName").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const address = document.getElementById("address").value.trim();
+        const serviceDate = dateInput.value;
+        const description =
+          document.getElementById("description").value.trim();
+
+        if (!customerName || !phone || !address ||
+            !serviceDate || !description) {
+          showMessage("Please fill in all required fields.", true);
+          return;
+        }
+
+        await F.addDoc(F.collection(db, "bookings"), {
+          customerUid: user.uid,
+          customerName,
+          customerEmail: user.email || "",
+          phone,
+          address,
+          serviceDate,
+          description,
+          workerUid: workerId,
+          workerName: worker.name || "",
+          workerSkill: worker.skill || "",
+          status: "pending",
+          createdAt: F.serverTimestamp()
+        });
+
+        form.reset();
+        dateInput.min = localToday;
+        showMessage(
+          "Booking request sent successfully! Your request is pending."
+        );
+      } catch (error) {
+        console.error(error);
+        if (error.code === "permission-denied") {
+          showMessage(
+            "Permission denied. Firebase booking rules need to be added.",
+            true
+          );
+        } else {
+          showMessage(
+            "Could not send booking. Please check your connection and try again.",
+            true
+          );
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Send Booking Request";
+      }
+    });
+
+    form.hidden = false;
+    loadWorker();
+  </script>
+</body>
+</html>

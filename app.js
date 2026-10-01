@@ -460,6 +460,10 @@ export function renderChrome() {
     ? '<a href="/admin.html">Admin Panel</a>'
     : ''}
 
+  ${role === "customer"
+    ? '<a href="/customer-dashboard.html">My Bookings</a>'
+    : ''}
+
   <a href="#" id="lo">${t("logout")}</a>
 `;
     

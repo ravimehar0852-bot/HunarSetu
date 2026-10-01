@@ -1,203 +1,283 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HunarSetu Admin Dashboard</title>
+  <title>Admin Dashboard | HunarSetu</title>
   <link rel="stylesheet" href="./styles.css">
 
   <style>
-    body {
-      background: #f8fafc;
-      color: #0f172a;
+    :root {
+      --admin-bg: #f5f7fb;
+      --admin-card: #ffffff;
+      --admin-text: #172033;
+      --admin-muted: #64748b;
+      --admin-border: #e2e8f0;
+      --admin-primary: #2563eb;
+      --admin-green: #15803d;
+      --admin-red: #dc2626;
+      --admin-orange: #c2410c;
     }
 
-    .admin-wrap {
-      max-width: 1100px;
-      margin: 35px auto;
-      padding: 20px;
+    body {
+      background: var(--admin-bg);
+      color: var(--admin-text);
+      margin: 0;
+    }
+
+    .admin-container {
+      width: min(1100px, 94%);
+      margin: 28px auto;
+      padding-bottom: 40px;
     }
 
     .admin-heading {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
 
-    .admin-heading h1 { margin: 0; font-size: 28px; }
-    .admin-note { color: #64748b; margin-top: 8px; }
+    .admin-heading h1 {
+      margin: 0 0 8px;
+      font-size: clamp(25px, 5vw, 34px);
+    }
+
+    .admin-heading p {
+      color: var(--admin-muted);
+      margin: 0;
+    }
 
     .admin-tabs {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin: 20px 0;
+      margin-bottom: 20px;
     }
 
     .admin-tab {
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 12px 18px;
+      border: 1px solid var(--admin-border);
       background: white;
-      color: #0f172a;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .admin-tab.active {
-      background: #0f766e;
-      color: white;
-      border-color: #0f766e;
-    }
-
-    .admin-section[hidden] { display: none; }
-
-    .worker-card, .booking-card {
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 20px;
-      margin: 16px 0;
-      box-shadow: 0 4px 16px #0f172a08;
-      overflow-wrap: anywhere;
-    }
-
-    .worker-card h3, .booking-card h3 {
-      margin: 0 0 12px;
-    }
-
-    .worker-card p, .booking-card p { margin: 8px 0; }
-
-    .status {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 20px;
-      background: #fef3c7;
-      color: #92400e;
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: capitalize;
-    }
-
-    .status.confirmed { background: #dbeafe; color: #1d4ed8; }
-    .status.completed { background: #d1fae5; color: #065f46; }
-    .status.rejected { background: #fee2e2; color: #991b1b; }
-
-    .admin-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .admin-actions button, .refresh-btn {
-      border: 0;
+      color: var(--admin-text);
       border-radius: 10px;
       padding: 12px 16px;
       font-weight: 700;
       cursor: pointer;
     }
 
-    .admin-actions button:disabled,
-    .refresh-btn:disabled {
-      opacity: .55;
-      cursor: not-allowed;
+    .admin-tab.active {
+      background: var(--admin-primary);
+      border-color: var(--admin-primary);
+      color: white;
     }
 
-    .approve-btn { background: #047857; color: white; }
-    .reject-btn { background: #dc2626; color: white; }
-    .complete-btn { background: #0f766e; color: white; }
+    .admin-section {
+      display: none;
+    }
 
-    .refresh-btn { background: #0f172a; color: white; }
+    .admin-section.active {
+      display: block;
+    }
 
-    #message {
-      padding: 12px 0;
-      color: #475569;
+    .admin-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .admin-card {
+      background: var(--admin-card);
+      border: 1px solid var(--admin-border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .admin-card h3 {
+      margin: 0 0 8px;
+      font-size: 19px;
       overflow-wrap: anywhere;
     }
 
-    .empty-state {
-      padding: 25px;
-      background: white;
-      border: 1px dashed #cbd5e1;
-      border-radius: 14px;
-      text-align: center;
-      color: #64748b;
+    .admin-card p {
+      margin: 7px 0;
+      color: #475569;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
     }
 
-    .section-title { margin-top: 30px; }
+    .admin-card strong {
+      color: var(--admin-text);
+    }
+
+    .admin-badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 6px 10px;
+      margin: 5px 0 12px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-confirmed {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .status-completion_requested {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
+    .status-completed,
+    .status-approved {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    .admin-btn {
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      color: white;
+      background: var(--admin-primary);
+    }
+
+    .admin-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .admin-btn.success {
+      background: var(--admin-green);
+    }
+
+    .admin-btn.danger {
+      background: var(--admin-red);
+    }
+
+    .admin-btn.warning {
+      background: var(--admin-orange);
+    }
+
+    .admin-message {
+      background: white;
+      border: 1px solid var(--admin-border);
+      border-radius: 12px;
+      padding: 18px;
+      color: var(--admin-muted);
+    }
+
+    .admin-notice {
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      border-radius: 12px;
+      padding: 13px;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .admin-top-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .admin-container {
+        width: 92%;
+        margin-top: 20px;
+      }
+
+      .admin-card {
+        padding: 15px;
+      }
+
+      .admin-btn {
+        flex: 1 1 140px;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <div id="site-header"></div>
+  <main class="admin-container">
+    <header class="admin-heading">
+      <h1>Admin Dashboard</h1>
+      <p>Manage worker applications and customer bookings.</p>
+    </header>
 
-  <main class="admin-wrap">
-    <div class="admin-heading">
-      <div>
-        <h1>Admin Dashboard</h1>
-        <p class="admin-note">Manage workers and service bookings.</p>
-      </div>
-
-      <button class="refresh-btn" id="refreshBtn">Refresh All</button>
+    <div class="admin-notice">
+      <strong>Completion workflow:</strong>
+      Jab worker completion request bhejega, booking yahan
+      <strong>Completion Requested</strong> status mein dikhegi.
+      Work verify karne ke baad hi Confirm Completed karein.
     </div>
 
-    <div id="message">Checking admin access...</div>
-
-    <nav class="admin-tabs" aria-label="Admin sections">
-      <button class="admin-tab active" data-tab="workers">
-        Worker Applications
-      </button>
-      <button class="admin-tab" data-tab="bookings">
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="bookings">
         Bookings
       </button>
-    </nav>
 
-    <section id="workersSection" class="admin-section">
-      <h2 class="section-title">Worker Applications</h2>
-      <div id="workerList"></div>
+      <button class="admin-tab" data-tab="workers">
+        Worker Applications
+      </button>
+    </div>
+
+    <div class="admin-top-actions">
+      <button class="admin-btn" id="refreshBtn" type="button">
+        Refresh
+      </button>
+    </div>
+
+    <section class="admin-section active" id="bookingsSection">
+      <div class="admin-list" id="bookingsList">
+        <div class="admin-message">Loading bookings...</div>
+      </div>
     </section>
 
-    <section id="bookingsSection" class="admin-section" hidden>
-      <h2 class="section-title">Service Bookings</h2>
-      <div id="bookingList"></div>
+    <section class="admin-section" id="workersSection">
+      <div class="admin-list" id="workersList">
+        <div class="admin-message">Loading worker applications...</div>
+      </div>
     </section>
   </main>
 
-  <div id="site-footer"></div>
-
   <script type="module">
     import {
-      auth,
-      db,
       A,
       F,
       renderChrome,
-      getRole,
-      toast
+      getRole
     } from "./app.js";
 
-    renderChrome();
-
-    const message = document.getElementById("message");
-    const workerList = document.getElementById("workerList");
-    const bookingList = document.getElementById("bookingList");
+    const bookingsList = document.getElementById("bookingsList");
+    const workersList = document.getElementById("workersList");
     const refreshBtn = document.getElementById("refreshBtn");
 
-    const workersSection = document.getElementById("workersSection");
-    const bookingsSection = document.getElementById("bookingsSection");
-
     let currentUser = null;
-    let loadingWorkers = false;
-    let loadingBookings = false;
+    let busy = false;
 
-    function escapeHTML(value) {
-      return String(value ?? "").replace(/[&<>"']/g, char => ({
+    function escapeHTML(value = "") {
+      return String(value).replace(/[&<>"']/g, char => ({
         "&": "&amp;",
         "<": "&lt;",
         ">": "&gt;",
@@ -206,281 +286,391 @@
       })[char]);
     }
 
-    function showMessage(text) {
-      message.textContent = text;
+    function prettyStatus(status = "pending") {
+      const labels = {
+        pending: "Pending",
+        confirmed: "Confirmed",
+        completion_requested: "Completion Requested",
+        completed: "Completed",
+        rejected: "Rejected",
+        approved: "Approved",
+        active: "Active"
+      };
+
+      return labels[status] || status.replaceAll("_", " ");
+    }
+
+    function statusBadge(status = "pending") {
+      const safeStatus = escapeHTML(status);
+      return `
+        <span class="admin-badge status-${safeStatus}">
+          ${escapeHTML(prettyStatus(status))}
+        </span>
+      `;
+    }
+
+    function showMessage(container, message) {
+      container.innerHTML = `
+        <div class="admin-message">${escapeHTML(message)}</div>
+      `;
     }
 
     function formatDate(value) {
-      if (!value) return "Not specified";
+      if (!value) return "Not available";
 
       try {
-        if (typeof value.toDate === "function") {
-          return value.toDate().toLocaleString();
-        }
+        const date = typeof value.toDate === "function"
+          ? value.toDate()
+          : new Date(value);
 
-        const date = new Date(value);
-        return Number.isNaN(date.getTime())
-          ? String(value)
-          : date.toLocaleString();
+        if (Number.isNaN(date.getTime())) return "Not available";
+
+        return date.toLocaleString("en-IN", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        });
       } catch {
-        return "Not specified";
+        return "Not available";
       }
     }
 
-    function showEmpty(container, text) {
-      container.innerHTML = "";
-      const empty = document.createElement("div");
-      empty.className = "empty-state";
-      empty.textContent = text;
-      container.appendChild(empty);
-    }
+    async function updateBookingStatus(bookingId, newStatus) {
+      if (!currentUser || busy) return;
 
-    async function loadWorkers() {
-      if (!currentUser || loadingWorkers) return;
+      const messages = {
+        confirmed: "Is booking ko confirm karna hai?",
+        rejected: "Is booking ko reject karna hai?",
+        completed: "Kya aapne work verify kar liya hai aur booking complete karni hai?",
+        review: "Booking ko wapas Confirmed karna hai? Worker dobara completion request bhej sakega."
+      };
 
-      loadingWorkers = true;
-      workerList.textContent = "Loading worker applications...";
+      const confirmation = messages[newStatus] || "Continue?";
+
+      if (!window.confirm(confirmation)) return;
+
+      busy = true;
+      refreshBtn.disabled = true;
 
       try {
-        const result = await F.getDocs(
-          F.query(
-            F.collection(db, "workerProfiles"),
-            F.where("status", "==", "pending")
-          )
+        const finalStatus = newStatus === "review" ? "confirmed" : newStatus;
+
+        await F.updateDoc(
+          F.doc(F.collection(F.getFirestore ? F.getFirestore() : undefined, "bookings"), bookingId),
+          { status: finalStatus }
         );
 
-        if (result.empty) {
-          showEmpty(workerList, "No pending worker applications.");
-          return;
-        }
-
-        workerList.innerHTML = "";
-
-        result.forEach(workerDoc => {
-          const worker = workerDoc.data();
-          const card = document.createElement("article");
-          card.className = "worker-card";
-
-          card.innerHTML = `
-            <h3>${escapeHTML(worker.name || "Worker")}</h3>
-            <span class="status">Pending approval</span>
-            <p><strong>Skill:</strong> ${escapeHTML(worker.skill)}</p>
-            <p><strong>Area:</strong> ${escapeHTML(worker.area)}</p>
-            <p><strong>City:</strong> ${escapeHTML(worker.city)}</p>
-            <p><strong>Experience:</strong> ${escapeHTML(worker.experience)}</p>
-            <p><strong>Phone:</strong> ${escapeHTML(worker.phone)}</p>
-            <p><strong>Email:</strong> ${escapeHTML(worker.email)}</p>
-            <p><strong>Description:</strong> ${escapeHTML(worker.description)}</p>
-            <div class="admin-actions">
-              <button class="approve-btn" data-action="approved">Approve</button>
-              <button class="reject-btn" data-action="rejected">Reject</button>
-            </div>
-          `;
-
-          card.querySelectorAll("button").forEach(button => {
-            button.addEventListener("click", async () => {
-              const nextStatus = button.dataset.action;
-
-              if (!confirm(
-                nextStatus === "approved"
-                  ? "Approve this worker?"
-                  : "Reject this worker?"
-              )) return;
-
-              button.disabled = true;
-
-              try {
-                await F.updateDoc(
-                  F.doc(db, "workerProfiles", workerDoc.id),
-                  { status: nextStatus }
-                );
-
-                toast(nextStatus === "approved"
-                  ? "Worker approved successfully."
-                  : "Worker rejected.");
-
-                await loadWorkers();
-              } catch (error) {
-                console.error("Worker update error:", error);
-                toast("Worker update failed: " + (error.code || error.message));
-                button.disabled = false;
-              }
-            });
-          });
-
-          workerList.appendChild(card);
-        });
+        alert("Booking status updated successfully.");
+        await loadBookings();
       } catch (error) {
-        console.error("Load workers error:", error);
-        showEmpty(workerList, "Could not load workers: " +
-          (error.code || error.message));
+        console.error("Booking update error:", error);
+        alert(
+          error.code === "permission-denied"
+            ? "Permission denied. Please check Firestore Rules."
+            : "Booking update failed. Please try again."
+        );
       } finally {
-        loadingWorkers = false;
+        busy = false;
+        refreshBtn.disabled = false;
+      }
+    }
+
+    async function updateBooking(bookingId, newStatus) {
+      if (!currentUser || busy) return;
+
+      const messages = {
+        confirmed: "Is booking ko confirm karna hai?",
+        rejected: "Is booking ko reject karna hai?",
+        completed: "Kya aap work verify karke booking complete karna chahte hain?",
+        review: "Booking ko wapas Confirmed karna hai? Worker dobara completion request bhej sakega."
+      };
+
+      if (!window.confirm(messages[newStatus] || "Continue?")) return;
+
+      busy = true;
+      refreshBtn.disabled = true;
+
+      try {
+        const finalStatus = newStatus === "review" ? "confirmed" : newStatus;
+        const bookingRef = F.doc(db, "bookings", bookingId);
+
+        await F.updateDoc(bookingRef, {
+          status: finalStatus
+        });
+
+        alert("Booking status updated successfully.");
+        await loadBookings();
+      } catch (error) {
+        console.error(error);
+        alert(
+          error.code === "permission-denied"
+            ? "Permission denied. Firestore Rules check karein."
+            : "Update failed. Please try again."
+        );
+      } finally {
+        busy = false;
+        refreshBtn.disabled = false;
       }
     }
 
     async function loadBookings() {
-      if (!currentUser || loadingBookings) return;
+      if (!currentUser) return;
 
-      loadingBookings = true;
-      bookingList.textContent = "Loading bookings...";
+      showMessage(bookingsList, "Loading bookings...");
 
       try {
-        const result = await F.getDocs(
-          F.collection(db, "bookings")
+        const snapshot = await F.getDocs(
+          F.query(F.collection(db, "bookings"))
         );
 
-        if (result.empty) {
-          showEmpty(bookingList, "No bookings have been received yet.");
+        if (snapshot.empty) {
+          showMessage(bookingsList, "Abhi koi booking nahi hai.");
           return;
         }
 
-        const bookings = result.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
+        const bookings = snapshot.docs.map(docSnap => ({
+          id: docSnap.id,
+          ...docSnap.data()
         }));
 
         bookings.sort((a, b) => {
-          const dateA = a.createdAt?.toMillis?.() || 0;
-          const dateB = b.createdAt?.toMillis?.() || 0;
-          return dateB - dateA;
+          const timeA = a.createdAt?.toMillis?.() || 0;
+          const timeB = b.createdAt?.toMillis?.() || 0;
+          return timeB - timeA;
         });
 
-        bookingList.innerHTML = "";
+        bookingsList.innerHTML = bookings.map(booking => {
+          const status = booking.status || "pending";
 
-        bookings.forEach(booking => {
-          const status = String(booking.status || "pending").toLowerCase();
-
-          const card = document.createElement("article");
-          card.className = "booking-card";
-
-          card.innerHTML = `
-            <h3>Booking Request</h3>
-            <span class="status ${escapeHTML(status)}">
-              ${escapeHTML(status)}
-            </span>
-
-            <p><strong>Customer:</strong>
-              ${escapeHTML(booking.customerName)}</p>
-            <p><strong>Customer phone:</strong>
-              ${escapeHTML(booking.phone)}</p>
-            <p><strong>Customer email:</strong>
-              ${escapeHTML(booking.customerEmail)}</p>
-            <p><strong>Address:</strong>
-              ${escapeHTML(booking.address)}</p>
-            <p><strong>Service date:</strong>
-              ${escapeHTML(booking.serviceDate)}</p>
-            <p><strong>Work description:</strong>
-              ${escapeHTML(booking.description)}</p>
-            <hr>
-            <p><strong>Worker:</strong>
-              ${escapeHTML(booking.workerName)}</p>
-            <p><strong>Worker skill:</strong>
-              ${escapeHTML(booking.workerSkill)}</p>
-            <p><strong>Booking received:</strong>
-              ${escapeHTML(formatDate(booking.createdAt))}</p>
-
-            <div class="admin-actions"></div>
-          `;
-
-          const actions = card.querySelector(".admin-actions");
-
-          function addAction(label, nextStatus, className) {
-            const button = document.createElement("button");
-            button.className = className;
-            button.textContent = label;
-
-            button.addEventListener("click", async () => {
-              if (!confirm(`Change booking status to ${nextStatus}?`)) {
-                return;
-              }
-
-              button.disabled = true;
-
-              try {
-                await F.updateDoc(
-                  F.doc(db, "bookings", booking.id),
-                  { status: nextStatus }
-                );
-
-                toast("Booking status updated to " + nextStatus + ".");
-                await loadBookings();
-              } catch (error) {
-                console.error("Booking update error:", error);
-                toast("Booking update failed: " +
-                  (error.code || error.message));
-                button.disabled = false;
-              }
-            });
-
-            actions.appendChild(button);
-          }
+          let actions = "";
 
           if (status === "pending") {
-            addAction("Confirm Booking", "confirmed", "approve-btn");
-            addAction("Reject Booking", "rejected", "reject-btn");
+            actions = `
+              <button class="admin-btn success"
+                data-booking-action="confirmed"
+                data-id="${escapeHTML(booking.id)}">
+                Confirm Booking
+              </button>
+
+              <button class="admin-btn danger"
+                data-booking-action="rejected"
+                data-id="${escapeHTML(booking.id)}">
+                Reject Booking
+              </button>
+            `;
+          } else if (status === "completion_requested") {
+            actions = `
+              <button class="admin-btn success"
+                data-booking-action="completed"
+                data-id="${escapeHTML(booking.id)}">
+                Confirm Completed
+              </button>
+
+              <button class="admin-btn warning"
+                data-booking-action="review"
+                data-id="${escapeHTML(booking.id)}">
+                Review Again
+              </button>
+            `;
           } else if (status === "confirmed") {
-            addAction("Mark Completed", "completed", "complete-btn");
-            addAction("Reject Booking", "rejected", "reject-btn");
+            actions = `
+              <button class="admin-btn success"
+                data-booking-action="completed"
+                data-id="${escapeHTML(booking.id)}">
+                Mark Completed
+              </button>
+
+              <button class="admin-btn danger"
+                data-booking-action="rejected"
+                data-id="${escapeHTML(booking.id)}">
+                Reject Booking
+              </button>
+            `;
           }
 
-          bookingList.appendChild(card);
-        });
+          return `
+            <article class="admin-card">
+              <h3>${escapeHTML(booking.customerName || "Customer")}</h3>
+              ${statusBadge(status)}
+
+              <p><strong>Service:</strong> ${escapeHTML(booking.workerSkill || "Not specified")}</p>
+              <p><strong>Worker:</strong> ${escapeHTML(booking.workerName || "Not specified")}</p>
+              <p><strong>Customer email:</strong> ${escapeHTML(booking.customerEmail || "Not provided")}</p>
+              <p><strong>Phone:</strong> ${escapeHTML(booking.phone || "Not provided")}</p>
+              <p><strong>Address:</strong> ${escapeHTML(booking.address || "Not provided")}</p>
+              <p><strong>Service date:</strong> ${escapeHTML(booking.serviceDate || "Not specified")}</p>
+              <p><strong>Description:</strong> ${escapeHTML(booking.description || "No description")}</p>
+              <p><strong>Booking created:</strong> ${escapeHTML(formatDate(booking.createdAt))}</p>
+
+              ${
+                status === "completion_requested"
+                  ? `<p><strong>Completion requested:</strong> ${escapeHTML(formatDate(booking.completionRequestedAt))}</p>`
+                  : ""
+              }
+
+              <div class="admin-actions">${actions}</div>
+            </article>
+          `;
+        }).join("");
+
       } catch (error) {
         console.error("Load bookings error:", error);
-        showEmpty(
-          bookingList,
-          "Could not load bookings: " + (error.code || error.message)
-        );
-      } finally {
-        loadingBookings = false;
+        showMessage(bookingsList, "Bookings load nahi hui. Firestore Rules check karein.");
       }
     }
 
-    document.querySelectorAll("[data-tab]").forEach(button => {
-      button.addEventListener("click", () => {
-        const tab = button.dataset.tab;
+    async function updateWorkerStatus(workerId, status) {
+      if (!currentUser || busy) return;
 
-        document.querySelectorAll("[data-tab]").forEach(item => {
-          item.classList.toggle("active", item === button);
+      const message = status === "approved"
+        ? "Is worker application ko approve karna hai?"
+        : "Is worker application ko reject karna hai?";
+
+      if (!window.confirm(message)) return;
+
+      busy = true;
+      refreshBtn.disabled = true;
+
+      try {
+        await F.updateDoc(F.doc(db, "workerProfiles", workerId), {
+          status
         });
 
-        workersSection.hidden = tab !== "workers";
-        bookingsSection.hidden = tab !== "bookings";
+        alert(status === "approved" ? "Worker approved." : "Worker rejected.");
+        await loadWorkers();
+      } catch (error) {
+        console.error("Worker update error:", error);
+        alert(
+          error.code === "permission-denied"
+            ? "Permission denied. Firestore Rules check karein."
+            : "Worker status update nahi hua."
+        );
+      } finally {
+        busy = false;
+        refreshBtn.disabled = false;
+      }
+    }
 
-        if (tab === "bookings") loadBookings();
+    async function loadWorkers() {
+      if (!currentUser) return;
+
+      showMessage(workersList, "Loading worker applications...");
+
+      try {
+        const snapshot = await F.getDocs(
+          F.query(F.collection(db, "workerProfiles"))
+        );
+
+        const workers = snapshot.docs
+          .map(docSnap => ({
+            id: docSnap.id,
+            ...docSnap.data()
+          }))
+          .filter(worker => worker.status === "pending");
+
+        if (!workers.length) {
+          showMessage(workersList, "Koi pending worker application nahi hai.");
+          return;
+        }
+
+        workersList.innerHTML = workers.map(worker => `
+          <article class="admin-card">
+            <h3>${escapeHTML(worker.name || "Worker")}</h3>
+            ${statusBadge(worker.status || "pending")}
+
+            <p><strong>Skill:</strong> ${escapeHTML(worker.skill || "Not specified")}</p>
+            <p><strong>Area:</strong> ${escapeHTML(worker.area || "Not specified")}</p>
+            <p><strong>City:</strong> ${escapeHTML(worker.city || "Not specified")}</p>
+            <p><strong>Experience:</strong> ${escapeHTML(worker.experience || "Not specified")}</p>
+            <p><strong>Phone:</strong> ${escapeHTML(worker.phone || "Not provided")}</p>
+            <p><strong>Email:</strong> ${escapeHTML(worker.email || "Not provided")}</p>
+            <p><strong>Description:</strong> ${escapeHTML(worker.description || "No description")}</p>
+
+            <div class="admin-actions">
+              <button class="admin-btn success"
+                data-worker-action="approved"
+                data-id="${escapeHTML(worker.id)}">
+                Approve Worker
+              </button>
+
+              <button class="admin-btn danger"
+                data-worker-action="rejected"
+                data-id="${escapeHTML(worker.id)}">
+                Reject Worker
+              </button>
+            </div>
+          </article>
+        `).join("");
+
+      } catch (error) {
+        console.error("Load workers error:", error);
+        showMessage(workersList, "Worker applications load nahi hui. Firestore Rules check karein.");
+      }
+    }
+
+    document.querySelectorAll(".admin-tab").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".admin-tab").forEach(tab => {
+          tab.classList.toggle("active", tab === button);
+        });
+
+        document.querySelectorAll(".admin-section").forEach(section => {
+          section.classList.toggle(
+            "active",
+            section.id === `${button.dataset.tab}Section`
+          );
+        });
       });
     });
 
-    A.onAuthStateChanged(auth, async user => {
+    bookingsList.addEventListener("click", event => {
+      const button = event.target.closest("[data-booking-action]");
+      if (!button) return;
+
+      updateBooking(button.dataset.id, button.dataset.bookingAction);
+    });
+
+    workersList.addEventListener("click", event => {
+      const button = event.target.closest("[data-worker-action]");
+      if (!button) return;
+
+      updateWorkerStatus(button.dataset.id, button.dataset.workerAction);
+    });
+
+    refreshBtn.addEventListener("click", async () => {
+      await Promise.all([loadBookings(), loadWorkers()]);
+    });
+
+    let db;
+
+    A.onAuthStateChanged(A.getAuth ? A.getAuth() : undefined, async user => {
       if (!user) {
-        location.href = "/login.html";
+        window.location.href = "./login.html";
         return;
       }
 
       try {
+        currentUser = user;
+
         const role = await getRole(user);
 
         if (role !== "admin") {
-          showMessage("Access denied. Admin account required.");
-          workersSection.hidden = true;
-          bookingsSection.hidden = true;
+          alert("Admin access required.");
+          window.location.href = "./index.html";
           return;
         }
 
-        currentUser = user;
-        showMessage("Admin access verified.");
-        await loadWorkers();
-      } catch (error) {
-        console.error("Admin access error:", error);
-        showMessage("Access check failed: " + error.message);
-      }
-    });
+        db = F.getFirestore ? F.getFirestore() : undefined;
 
-    refreshBtn.addEventListener("click", async () => {
-      await Promise.all([loadWorkers(), loadBookings()]);
+        if (typeof renderChrome === "function") {
+          renderChrome(user, role);
+        }
+
+        await Promise.all([loadBookings(), loadWorkers()]);
+      } catch (error) {
+        console.error("Admin initialization error:", error);
+        showMessage(bookingsList, "Admin dashboard initialize nahi ho paya.");
+      }
     });
   </script>
 </body>
-  </html>
-  
+</html>

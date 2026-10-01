@@ -250,6 +250,23 @@
 
     let workers = [];
     let selectedSkill = "";
+    const params = new URLSearchParams(window.location.search);
+const selectedCategory = (params.get("cat") || "").toLowerCase();
+
+const categoryNames = {
+  electrician: "electrician",
+  plumber: "plumber",
+  carpenter: "carpenter",
+  painter: "painter",
+  mechanic: "mechanic",
+  ac: "ac",
+  tailor: "tailor",
+  cleaner: "cleaner",
+  tutor: "tutor",
+  other: "other"
+};
+
+const categoryName = categoryNames[selectedCategory] || "";
 
     function safe(value) {
       return String(value ?? "").replace(/[&<>"']/g, char => ({

@@ -134,8 +134,13 @@
     .worker-contact a.secondary {
       background: #f1f5f9;
       color: #0f172a;
+      
     }
 
+    .worker-contact a.booking-btn {
+  background: #7c3aed;
+  color: white;
+      }
     .workers-empty {
       padding: 30px 18px;
       text-align: center;
@@ -368,17 +373,22 @@
               ${safe(worker.description || "Local service professional.")}
             </p>
 
-            ${phone ? `
-              <div class="worker-contact">
-                <a href="tel:${safe(phone)}">Call Worker</a>
-                <a
-                  class="secondary"
-                  href="https://wa.me/${safe(phone.replace(/\D/g, ""))}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >WhatsApp</a>
-              </div>
-            ` : ""}
+            <div class="worker-contact">
+  ${phone ? `
+    <a href="tel:${safe(phone)}">Call Worker</a>
+    <a
+      class="secondary"
+      href="https://wa.me/${safe(phone.replace(/\D/g, ""))}"
+      target="_blank"
+      rel="noopener noreferrer"
+    >WhatsApp</a>
+  ` : ""}
+
+  <a
+    class="booking-btn"
+    href="./booking.html?worker=${encodeURIComponent(worker.id)}"
+  >Book Now</a>
+</div>
           </article>
         `;
       }).join("");

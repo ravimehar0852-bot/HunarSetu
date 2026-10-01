@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HunarSetu Admin Dashboard</title>
+  <link rel="stylesheet" href="./styles.css">
+
+  <style>
+    body {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .admin-wrap {
+      max-width: 1000px;
+      margin: 35px auto;
+      padding: 20px;
+    }
+
+    .admin-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .admin-heading h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .admin-note {
+      color: #64748b;
+      margin-top: 8px;
+    }
+
+    .worker-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 16px 0;
+      box-shadow: 0 4px 16px #0f172a08;
+    }
+
+    .worker-card h3 {
+      margin: 0 0 12px;
+    }
+
+    .worker-card p {
+      margin: 8px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .admin-actions button {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .approve-btn {
+      background: #047857;
+      color: white;
+    }
+
+    .reject-btn {
+      background: #dc2626;
+      color: white;
+    }
+
+    .refresh-btn {
+      background: #0f172a;
+      color: white;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+
+    #message {
+      padding: 12px 0;
+      color: #475569;
+      overflow-wrap: anywhere;
+    }
+
+    .empty-state {
+      padding: 25px;
+      background: white;
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="site-header"></div>
+
+  <main class="admin-wrap">
+    <div class="admin-heading">
+      <div>
+        <h1>Admin Dashboard</h1>
+        <p class="admin-note">
+          HunarSetu worker applications
+        </p>
+      </div>
+
+      <button class="refresh-btn" id="refreshBtn">
+        Refresh
+      </button>
+    </div>
+
+    <div id="message">Checking admin access...</div>
+    <section id="workerList"></section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script type="module">
+    import {
+      auth,
+      db,
+      A,
+      F,
+      renderChrome,
+      getRole,
+      toast
+    } from "./app.js";
+
+    renderChrome();
+
+    const message = document.getElementById("message");
+    const workerList = document.getElementById("workerList");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    let currentUser = null;
+    let busy = false;
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function showMessage(text) {
+      message.textContent = text;
+    }
+
+    async function loadWorkers() {
+      if (!currentUser || busy) return;
+
+      busy = true;
+      refreshBtn.disabled = true;
+      showMessage("Loading worker applications...");
+      workerList.replaceChildren();
+
+      try {
+        const result = await F.getDocs(
+          F.query(
+            F.collection(db, "workerProfiles"),
+            F.where("status", "==", "pending")
+          )
+        );
+
+        if (result.empty) {
+          showMessage("");
+          workerList.innerHTML =
+            '<div class="empty-state">No pending worker applications.</div>';
+          return;
+        }
+
+        showMessage(result.size + " pending application(s)");
+
+        result.forEach((workerDoc) => {
+          const worker = workerDoc.data();
+
+          const card = document.createElement("article");
+          card.className = "worker-card";
+
+          card.innerHTML = `
+            <h3>${escapeHTML(worker.name || "Worker")}</h3>
+            <span class="status">Pending approval</span>
+
+            <p><strong>Skill:</strong> ${escapeHTML(worker.skill)}</p>
+            <p><strong>Area:</strong> ${escapeHTML(worker.area)}</p>
+            <p><strong>City:</strong> ${escapeHTML(worker.city)}</p>
+            <p><strong>Experience:</strong> ${escapeHTML(worker.experience)}</p>
+            <p><strong>Phone:</strong> ${escapeHTML(worker.phone)}</p>
+            <p><strong>Email:</strong> ${escapeHTML(worker.email)}</p>
+            <p><strong>Description:</strong> ${escapeHTML(worker.description)}</p>
+
+            <div class="admin-actions">
+              <button class="approve-btn" data-action="approved">
+                Approve
+              </button>
+              <button class="reject-btn" data-action="rejected">
+                Reject
+              </button>
+            </div>
+          `;
+
+          card.querySelectorAll("button").forEach(button => {
+            button.addEventListener("click", async () => {
+              const nextStatus = button.dataset.action;
+
+              const confirmed = confirm(
+                nextStatus === "approved"
+                  ? "Approve this worker?"
+                  : "Reject this worker?"
+              );
+
+              if (!confirmed) return;
+
+              button.disabled = true;
+
+              try {
+                await F.updateDoc(
+                  F.doc(db, "workerProfiles", workerDoc.id),
+                  { status: nextStatus }
+                );
+
+                toast(
+                  nextStatus === "approved"
+                    ? "Worker approved successfully."
+                    : "Worker rejected."
+                );
+
+                await loadWorkers();
+              } catch (error) {
+                console.error("Worker update error:", error);
+                toast("Update failed: " + (error.code || error.message));
+                button.disabled = false;
+              }
+            });
+          });
+
+          workerList.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error("Load workers error:", error);
+        showMessage(
+          "Could not load workers: " +
+          (error.code || error.message)
+        );
+      } finally {
+        busy = false;
+        refreshBtn.disabled = false;
+      }
+    }
+
+    A.onAuthStateChanged(auth, async user => {
+      if (!user) {
+        location.href = "/login.html";
+        return;
+      }
+
+      try {
+        const role = await getRole(user);
+
+        if (role !== "admin") {
+          showMessage("Access denied. Admin account required.");
+          return;
+        }
+
+        currentUser = user;
+        await loadWorkers();
+
+      } catch (error) {
+        console.error("Admin access error:", error);
+        showMessage("Access check failed: " + error.message);
+      }
+    });
+
+    refreshBtn.addEventListener("click", loadWorkers);
+  </script>
+</body>
+  </html>
+  

@@ -454,9 +454,15 @@ export function renderChrome() {
       const role = await getRole(user);
 
       authElement.innerHTML = `
-        <a href="${home(role)}">${t("dash")}</a>
-        <a href="#" id="lo">${t("logout")}</a>
-      `;
+  <a href="${home(role)}">${t("dash")}</a>
+
+  ${role === "admin"
+    ? '<a href="/admin.html">Admin Panel</a>'
+    : ''}
+
+  <a href="#" id="lo">${t("logout")}</a>
+`;
+    
 
       const logoutButton = document.getElementById("lo");
 

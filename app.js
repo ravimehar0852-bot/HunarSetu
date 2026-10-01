@@ -462,7 +462,11 @@ export function renderChrome() {
 
   ${role === "customer"
     ? '<a href="/customer-dashboard.html">My Bookings</a>'
-    : ''}
+    ${role === "worker"
+  ? '<a href="/worker-dashboard.html">Worker Dashboard</a>'
+      
+  : ''}
+    
 
   <a href="#" id="lo">${t("logout")}</a>
 `;

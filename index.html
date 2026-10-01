@@ -6,83 +6,100 @@
 
   <title>HunarSetu — Local Skills. Local Work. Local Growth.</title>
 
-  <meta name="description" content="Find skilled local professionals in Jhalawar, Rajasthan. Discover services, compare workers and book appointments with HunarSetu.">
+  <meta
+    name="description"
+    content="Find skilled local professionals in Jhalawar, Rajasthan. Discover services, compare workers and book appointments with HunarSetu."
+  >
 
   <meta name="theme-color" content="#115E59">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="./styles.css">
+
   <style>
-  #cats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-  }
-
-  .service-card {
-    display: block;
-    overflow: hidden;
-    border-radius: 18px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    text-decoration: none;
-    color: #172033;
-    box-shadow: 0 5px 18px rgba(15, 23, 42, .06);
-  }
-
-  .service-card img {
-    width: 100%;
-    height: 135px;
-    object-fit: cover;
-    display: block;
-    background: #e5e7eb;
-  }
-
-  .service-card-info {
-    padding: 13px;
-  }
-
-  .service-card h3 {
-    margin: 0;
-    font-size: 16px;
-  }
-
-  .service-card p {
-    margin: 6px 0 0;
-    color: #64748b;
-    font-size: 13px;
-  }
-
-  @media (min-width: 650px) {
     #cats {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .service-card {
+      display: block;
+      overflow: hidden;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      text-decoration: none;
+      color: #172033;
+      box-shadow: 0 5px 18px rgba(15, 23, 42, .06);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .service-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, .10);
     }
 
     .service-card img {
-      height: 175px;
+      width: 100%;
+      height: 135px;
+      object-fit: cover;
+      display: block;
+      background: #e5e7eb;
     }
-  }
 
-  @media (min-width: 950px) {
-    #cats {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+    .service-card-info {
+      padding: 13px;
     }
-  }
+
+    .service-card h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .service-card p {
+      margin: 6px 0 0;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .service-card .service-icon {
+      font-size: 27px;
+      margin-bottom: 8px;
+    }
+
+    @media (min-width: 650px) {
+      #cats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .service-card img {
+        height: 175px;
+      }
+    }
+
+    @media (min-width: 950px) {
+      #cats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- NAVIGATION: app.js will render the navbar here -->
   <div id="site-header"></div>
 
   <main>
 
-    <!-- HERO SECTION -->
+    <!-- HERO -->
     <section class="hero">
       <div class="wrap">
 
@@ -100,7 +117,6 @@
           book appointments, and get your work done with confidence.
         </p>
 
-        <!-- SEARCH FORM -->
         <form class="search" id="searchForm" role="search">
 
           <input
@@ -126,11 +142,11 @@
         </form>
 
         <div class="hero-actions">
-          <a class="btn gold" href="workers.html">
+          <a class="btn gold" href="./workers.html">
             Find Workers
           </a>
 
-          <a class="btn ghost" href="register.html?role=worker">
+          <a class="btn ghost" href="./register.html?role=worker">
             Become a Worker
           </a>
         </div>
@@ -151,10 +167,10 @@
           <div>
             <span class="eyebrow">Explore services</span>
             <h2>Service Categories</h2>
-            <p>Find the right professional for your needs.</p>
+            <p>Choose a service to find the right professional.</p>
           </div>
 
-          <a href="workers.html" class="text-link">
+          <a href="./workers.html" class="text-link">
             View all services →
           </a>
         </div>
@@ -170,7 +186,7 @@
     </section>
 
 
-    <!-- WORKERS -->
+    <!-- LOCAL WORKERS -->
     <section class="blk">
       <div class="wrap">
 
@@ -181,7 +197,7 @@
             <p>Explore available service professionals.</p>
           </div>
 
-          <a href="workers.html" class="text-link">
+          <a href="./workers.html" class="text-link">
             View all workers →
           </a>
         </div>
@@ -217,7 +233,7 @@
             <div class="step-number">02</div>
             <h3>Choose a Professional</h3>
             <p>
-              Explore profiles, skills, experience and pricing.
+              Explore profiles, skills and experience.
             </p>
           </article>
 
@@ -225,7 +241,7 @@
             <div class="step-number">03</div>
             <h3>Book a Service</h3>
             <p>
-              Contact a professional and arrange your service.
+              Select a professional and send a booking request.
             </p>
           </article>
 
@@ -249,7 +265,7 @@
             </p>
           </div>
 
-          <a class="btn gold" href="register.html?role=worker">
+          <a class="btn gold" href="./register.html?role=worker">
             Join as a Worker
           </a>
         </div>
@@ -280,12 +296,10 @@
 
   </main>
 
-
-  <!-- FOOTER: app.js will render the footer here -->
   <div id="site-footer"></div>
 
 
-  <!-- APPLICATION SCRIPT -->
+  <!-- APPLICATION SCRIPT: Keep only this one script -->
   <script type="module">
     import {
       renderChrome,
@@ -310,6 +324,71 @@
         "'": "&#39;"
       }[char]));
 
+    // SERVICE CATEGORY DATA
+    const categories = [
+      {
+        id: "electrician",
+        name: "Electrician",
+        icon: "⚡",
+        image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=700&q=80"
+      },
+      {
+        id: "plumber",
+        name: "Plumber",
+        icon: "🚰",
+        image: "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?auto=format&fit=crop&w=700&q=80"
+      },
+      {
+        id: "carpenter",
+        name: "Carpenter",
+        icon: "🪚",
+        image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=700&q=80"
+      },
+      {
+        id: "painter",
+        name: "Painter",
+        icon: "🎨",
+        image: "https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=700&q=80"
+      },
+      {
+        id: "mechanic",
+        name: "Mechanic",
+        icon: "🔧",
+        image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=700&q=80"
+      },
+      {
+        id: "ac",
+        name: "AC Repair",
+        icon: "❄️",
+        image: "https://images.unsplash.com/photo-1631545806609-7c3c8f9f7a3b?auto=format&fit=crop&w=700&q=80"
+      },
+      {
+        id: "tailor",
+        name: "Tailor",
+        icon: "🧵",
+        image: "https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=700&q=80"
+      },
+      {
+        id: "cleaner",
+        name: "Home Cleaning",
+        icon: "🧹",
+        image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=700&q=80"
+      },
+      {
+        id: "tutor",
+        name: "Tutor",
+        icon: "📚",
+        image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=700&q=80"
+      },
+      {
+        id: "other",
+        name: "Other Services",
+        icon: "✨",
+        image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=700&q=80"
+      }
+    ];
+
+
     // SEARCH
     searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -318,181 +397,129 @@
       const city = citySelect.value;
 
       const params = new URLSearchParams();
-<script type="module">
-  import {
-    renderChrome,
-    db,
-    F,
-    inr
-  } from "./app.js";
 
-  const cats = document.getElementById("cats");
-  const ws = document.getElementById("ws");
-
-  const searchForm = document.getElementById("searchForm");
-  const searchInput = document.getElementById("searchInput");
-  const citySelect = document.getElementById("citySelect");
-
-  const esc = value =>
-    String(value ?? "").replace(/[&<>"']/g, char => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    }[char]));
-
-  const categories = [
-    {
-      id: "electrician",
-      name: "Electrician",
-      image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-      id: "plumber",
-      name: "Plumber",
-      image: "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-      id: "carpenter",
-      name: "Carpenter",
-      image: "https://images.unsplash.com/photo- woodworking?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-      id: "painter",
-      name: "Painter",
-      image: "https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-      id: "mechanic",
-      name: "Mechanic",
-      image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-      id: "ac",
-      name: "AC Repair",
-      image: "https://images.unsplash.com/photo-1631545806609-7c3c8f9f7a3b?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-      id: "tailor",
-      name: "Tailor",
-      image: "https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-      id: "cleaner",
-      name: "Home Cleaning",
-      image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-      id: "tutor",
-      name: "Tutor",
-      image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-      id: "other",
-      name: "Other Services",
-      image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=700&q=80"
-    }
-  ];
-
-  searchForm.addEventListener("submit", event => {
-    event.preventDefault();
-
-    const params = new URLSearchParams();
-    const query = searchInput.value.trim();
-    const city = citySelect.value;
-
-    if (query) params.set("q", query);
-    if (city) params.set("city", city);
-
-    window.location.href =
-      "workers.html" + (params.toString() ? "?" + params : "");
-  });
-
-  try {
-    renderChrome();
-  } catch (error) {
-    console.error("Navigation error:", error);
-  }
-
-  function renderCategories(list) {
-    cats.innerHTML = list.map(category => `
-      <a class="service-card"
-         href="workers.html?cat=${encodeURIComponent(category.id)}">
-        <img
-          src="${esc(category.image)}"
-          alt="${esc(category.name)}"
-          loading="lazy"
-          onerror="this.style.display='none'"
-        >
-        <div class="service-card-info">
-          <h3>${esc(category.name)}</h3>
-          <p>View available professionals →</p>
-        </div>
-      </a>
-    `).join("");
-  }
-
-  async function loadHomepage() {
-    // Show categories immediately, without waiting for Firebase.
-    renderCategories(categories);
-
-    try {
-      const workerQuery = F.query(
-        F.collection(db, "workerProfiles"),
-        F.where("status", "==", "approved"),
-        F.limit(12)
-      );
-
-      const workerSnapshot = await F.getDocs(workerQuery);
-
-      if (workerSnapshot.empty) {
-        ws.innerHTML = `
-          <div class="empty card">
-            <h3>No Professionals Yet</h3>
-            <p>Approved local professionals will appear here.</p>
-            <a href="register.html?role=worker" class="btn gold">
-              Join as a Worker
-            </a>
-          </div>
-        `;
-        return;
+      if (query) {
+        params.set("q", query);
       }
 
-      ws.innerHTML = workerSnapshot.docs.map(doc => {
-        const worker = doc.data();
-        const price = Number(worker.startingPrice || 0);
+      if (city) {
+        params.set("city", city);
+      }
 
-        return `
-          <a class="card cat worker-card"
-             href="profile.html?id=${encodeURIComponent(doc.id)}">
-            <div class="worker-card-icon">👤</div>
-            <h3>${esc(worker.name || "Professional")}</h3>
-            <p>${esc(worker.skill || "Local Service")}</p>
-            <p>${esc(worker.area || worker.city || "Jhalawar")}</p>
-            ${
-              price > 0
-                ? `<p>Starting from <strong>${esc(inr(price))}</strong></p>`
-                : ""
-            }
-            <span class="text-link">View Profile →</span>
-          </a>
-        `;
-      }).join("");
+      window.location.href =
+        "./workers.html" +
+        (params.toString() ? "?" + params.toString() : "");
+    });
 
+
+    // NAVIGATION AND FOOTER
+    try {
+      renderChrome();
     } catch (error) {
-      console.error("Homepage worker load error:", error);
-
-      ws.innerHTML = `
-        <div class="empty card">
-          <h3>Workers Could Not Load</h3>
-          <p>Please refresh the page and try again.</p>
-        </div>
-      `;
+      console.error("Navigation error:", error);
     }
-  }
 
-  loadHomepage();
-</script>
+
+    // RENDER SERVICE CARDS
+    function renderCategories() {
+      cats.innerHTML = categories.map(category => `
+        <a
+          class="service-card"
+          href="./workers.html?cat=${encodeURIComponent(category.id)}"
+        >
+          <img
+            src="${esc(category.image)}"
+            alt="${esc(category.name)} service"
+            loading="lazy"
+            onerror="this.style.display='none'"
+          >
+
+          <div class="service-card-info">
+            <div class="service-icon">${category.icon}</div>
+            <h3>${esc(category.name)}</h3>
+            <p>View professionals →</p>
+          </div>
+        </a>
+      `).join("");
+    }
+
+
+    // LOAD APPROVED WORKERS
+    async function loadWorkers() {
+      try {
+        const workerQuery = F.query(
+          F.collection(db, "workerProfiles"),
+          F.where("status", "==", "approved"),
+          F.limit(12)
+        );
+
+        const workerSnapshot = await F.getDocs(workerQuery);
+
+        if (workerSnapshot.empty) {
+          ws.innerHTML = `
+            <div class="empty card">
+              <h3>No Professionals Yet</h3>
+              <p>
+                Approved local professionals will appear here.
+              </p>
+
+              <a
+                href="./register.html?role=worker"
+                class="btn gold"
+              >
+                Join as a Worker
+              </a>
+            </div>
+          `;
+          return;
+        }
+
+        ws.innerHTML = workerSnapshot.docs.map(doc => {
+          const worker = doc.data();
+          const price = Number(worker.startingPrice || 0);
+
+          return `
+            <a
+              class="card cat worker-card"
+              href="./profile.html?id=${encodeURIComponent(doc.id)}"
+            >
+              <div class="worker-card-icon">👤</div>
+
+              <h3>${esc(worker.name || "Professional")}</h3>
+
+              <p>${esc(worker.skill || "Local Service")}</p>
+
+              <p>${esc(worker.area || worker.city || "Jhalawar")}</p>
+
+              ${
+                price > 0
+                  ? `<p>Starting from <strong>${esc(inr(price))}</strong></p>`
+                  : ""
+              }
+
+              <span class="text-link">View Profile →</span>
+            </a>
+          `;
+        }).join("");
+
+      } catch (error) {
+        console.error("Homepage worker load error:", error);
+
+        ws.innerHTML = `
+          <div class="empty card">
+            <h3>Workers Could Not Load</h3>
+            <p>Please refresh the page and try again.</p>
+          </div>
+        `;
+      }
+    }
+
+
+    // START PAGE
+    renderCategories();
+    loadWorkers();
+
+  </script>
+
 </body>
-  </html>
+</html>

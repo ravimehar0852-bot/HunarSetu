@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HunarSetu Admin Dashboard</title>
   <link rel="stylesheet" href="./styles.css">
 
@@ -14,7 +15,7 @@
     }
 
     .admin-wrap {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 35px auto;
       padding: 20px;
     }
@@ -28,33 +29,49 @@
       margin-bottom: 24px;
     }
 
-    .admin-heading h1 {
-      margin: 0;
-      font-size: 28px;
+    .admin-heading h1 { margin: 0; font-size: 28px; }
+    .admin-note { color: #64748b; margin-top: 8px; }
+
+    .admin-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
     }
 
-    .admin-note {
-      color: #64748b;
-      margin-top: 8px;
+    .admin-tab {
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 12px 18px;
+      background: white;
+      color: #0f172a;
+      font-weight: 700;
+      cursor: pointer;
     }
 
-    .worker-card {
+    .admin-tab.active {
+      background: #0f766e;
+      color: white;
+      border-color: #0f766e;
+    }
+
+    .admin-section[hidden] { display: none; }
+
+    .worker-card, .booking-card {
       background: white;
       border: 1px solid #e2e8f0;
       border-radius: 16px;
       padding: 20px;
       margin: 16px 0;
       box-shadow: 0 4px 16px #0f172a08;
+      overflow-wrap: anywhere;
     }
 
-    .worker-card h3 {
+    .worker-card h3, .booking-card h3 {
       margin: 0 0 12px;
     }
 
-    .worker-card p {
-      margin: 8px 0;
-      overflow-wrap: anywhere;
-    }
+    .worker-card p, .booking-card p { margin: 8px 0; }
 
     .status {
       display: inline-block;
@@ -64,7 +81,12 @@
       color: #92400e;
       font-size: 13px;
       font-weight: 700;
+      text-transform: capitalize;
     }
+
+    .status.confirmed { background: #dbeafe; color: #1d4ed8; }
+    .status.completed { background: #d1fae5; color: #065f46; }
+    .status.rejected { background: #fee2e2; color: #991b1b; }
 
     .admin-actions {
       display: flex;
@@ -73,32 +95,25 @@
       margin-top: 18px;
     }
 
-    .admin-actions button {
+    .admin-actions button, .refresh-btn {
       border: 0;
       border-radius: 10px;
-      padding: 12px 18px;
+      padding: 12px 16px;
       font-weight: 700;
       cursor: pointer;
     }
 
-    .approve-btn {
-      background: #047857;
-      color: white;
+    .admin-actions button:disabled,
+    .refresh-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
     }
 
-    .reject-btn {
-      background: #dc2626;
-      color: white;
-    }
+    .approve-btn { background: #047857; color: white; }
+    .reject-btn { background: #dc2626; color: white; }
+    .complete-btn { background: #0f766e; color: white; }
 
-    .refresh-btn {
-      background: #0f172a;
-      color: white;
-      border: 0;
-      border-radius: 10px;
-      padding: 12px 18px;
-      cursor: pointer;
-    }
+    .refresh-btn { background: #0f172a; color: white; }
 
     #message {
       padding: 12px 0;
@@ -112,7 +127,10 @@
       border: 1px dashed #cbd5e1;
       border-radius: 14px;
       text-align: center;
+      color: #64748b;
     }
+
+    .section-title { margin-top: 30px; }
   </style>
 </head>
 
@@ -123,18 +141,32 @@
     <div class="admin-heading">
       <div>
         <h1>Admin Dashboard</h1>
-        <p class="admin-note">
-          HunarSetu worker applications
-        </p>
+        <p class="admin-note">Manage workers and service bookings.</p>
       </div>
 
-      <button class="refresh-btn" id="refreshBtn">
-        Refresh
-      </button>
+      <button class="refresh-btn" id="refreshBtn">Refresh All</button>
     </div>
 
     <div id="message">Checking admin access...</div>
-    <section id="workerList"></section>
+
+    <nav class="admin-tabs" aria-label="Admin sections">
+      <button class="admin-tab active" data-tab="workers">
+        Worker Applications
+      </button>
+      <button class="admin-tab" data-tab="bookings">
+        Bookings
+      </button>
+    </nav>
+
+    <section id="workersSection" class="admin-section">
+      <h2 class="section-title">Worker Applications</h2>
+      <div id="workerList"></div>
+    </section>
+
+    <section id="bookingsSection" class="admin-section" hidden>
+      <h2 class="section-title">Service Bookings</h2>
+      <div id="bookingList"></div>
+    </section>
   </main>
 
   <div id="site-footer"></div>
@@ -154,10 +186,15 @@
 
     const message = document.getElementById("message");
     const workerList = document.getElementById("workerList");
+    const bookingList = document.getElementById("bookingList");
     const refreshBtn = document.getElementById("refreshBtn");
 
+    const workersSection = document.getElementById("workersSection");
+    const bookingsSection = document.getElementById("bookingsSection");
+
     let currentUser = null;
-    let busy = false;
+    let loadingWorkers = false;
+    let loadingBookings = false;
 
     function escapeHTML(value) {
       return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -173,13 +210,36 @@
       message.textContent = text;
     }
 
-    async function loadWorkers() {
-      if (!currentUser || busy) return;
+    function formatDate(value) {
+      if (!value) return "Not specified";
 
-      busy = true;
-      refreshBtn.disabled = true;
-      showMessage("Loading worker applications...");
-      workerList.replaceChildren();
+      try {
+        if (typeof value.toDate === "function") {
+          return value.toDate().toLocaleString();
+        }
+
+        const date = new Date(value);
+        return Number.isNaN(date.getTime())
+          ? String(value)
+          : date.toLocaleString();
+      } catch {
+        return "Not specified";
+      }
+    }
+
+    function showEmpty(container, text) {
+      container.innerHTML = "";
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = text;
+      container.appendChild(empty);
+    }
+
+    async function loadWorkers() {
+      if (!currentUser || loadingWorkers) return;
+
+      loadingWorkers = true;
+      workerList.textContent = "Loading worker applications...";
 
       try {
         const result = await F.getDocs(
@@ -190,24 +250,20 @@
         );
 
         if (result.empty) {
-          showMessage("");
-          workerList.innerHTML =
-            '<div class="empty-state">No pending worker applications.</div>';
+          showEmpty(workerList, "No pending worker applications.");
           return;
         }
 
-        showMessage(result.size + " pending application(s)");
+        workerList.innerHTML = "";
 
-        result.forEach((workerDoc) => {
+        result.forEach(workerDoc => {
           const worker = workerDoc.data();
-
           const card = document.createElement("article");
           card.className = "worker-card";
 
           card.innerHTML = `
             <h3>${escapeHTML(worker.name || "Worker")}</h3>
             <span class="status">Pending approval</span>
-
             <p><strong>Skill:</strong> ${escapeHTML(worker.skill)}</p>
             <p><strong>Area:</strong> ${escapeHTML(worker.area)}</p>
             <p><strong>City:</strong> ${escapeHTML(worker.city)}</p>
@@ -215,14 +271,9 @@
             <p><strong>Phone:</strong> ${escapeHTML(worker.phone)}</p>
             <p><strong>Email:</strong> ${escapeHTML(worker.email)}</p>
             <p><strong>Description:</strong> ${escapeHTML(worker.description)}</p>
-
             <div class="admin-actions">
-              <button class="approve-btn" data-action="approved">
-                Approve
-              </button>
-              <button class="reject-btn" data-action="rejected">
-                Reject
-              </button>
+              <button class="approve-btn" data-action="approved">Approve</button>
+              <button class="reject-btn" data-action="rejected">Reject</button>
             </div>
           `;
 
@@ -230,13 +281,11 @@
             button.addEventListener("click", async () => {
               const nextStatus = button.dataset.action;
 
-              const confirmed = confirm(
+              if (!confirm(
                 nextStatus === "approved"
                   ? "Approve this worker?"
                   : "Reject this worker?"
-              );
-
-              if (!confirmed) return;
+              )) return;
 
               button.disabled = true;
 
@@ -246,16 +295,14 @@
                   { status: nextStatus }
                 );
 
-                toast(
-                  nextStatus === "approved"
-                    ? "Worker approved successfully."
-                    : "Worker rejected."
-                );
+                toast(nextStatus === "approved"
+                  ? "Worker approved successfully."
+                  : "Worker rejected.");
 
                 await loadWorkers();
               } catch (error) {
                 console.error("Worker update error:", error);
-                toast("Update failed: " + (error.code || error.message));
+                toast("Worker update failed: " + (error.code || error.message));
                 button.disabled = false;
               }
             });
@@ -263,18 +310,147 @@
 
           workerList.appendChild(card);
         });
-
       } catch (error) {
         console.error("Load workers error:", error);
-        showMessage(
-          "Could not load workers: " +
-          (error.code || error.message)
-        );
+        showEmpty(workerList, "Could not load workers: " +
+          (error.code || error.message));
       } finally {
-        busy = false;
-        refreshBtn.disabled = false;
+        loadingWorkers = false;
       }
     }
+
+    async function loadBookings() {
+      if (!currentUser || loadingBookings) return;
+
+      loadingBookings = true;
+      bookingList.textContent = "Loading bookings...";
+
+      try {
+        const result = await F.getDocs(
+          F.collection(db, "bookings")
+        );
+
+        if (result.empty) {
+          showEmpty(bookingList, "No bookings have been received yet.");
+          return;
+        }
+
+        const bookings = result.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        bookings.sort((a, b) => {
+          const dateA = a.createdAt?.toMillis?.() || 0;
+          const dateB = b.createdAt?.toMillis?.() || 0;
+          return dateB - dateA;
+        });
+
+        bookingList.innerHTML = "";
+
+        bookings.forEach(booking => {
+          const status = String(booking.status || "pending").toLowerCase();
+
+          const card = document.createElement("article");
+          card.className = "booking-card";
+
+          card.innerHTML = `
+            <h3>Booking Request</h3>
+            <span class="status ${escapeHTML(status)}">
+              ${escapeHTML(status)}
+            </span>
+
+            <p><strong>Customer:</strong>
+              ${escapeHTML(booking.customerName)}</p>
+            <p><strong>Customer phone:</strong>
+              ${escapeHTML(booking.phone)}</p>
+            <p><strong>Customer email:</strong>
+              ${escapeHTML(booking.customerEmail)}</p>
+            <p><strong>Address:</strong>
+              ${escapeHTML(booking.address)}</p>
+            <p><strong>Service date:</strong>
+              ${escapeHTML(booking.serviceDate)}</p>
+            <p><strong>Work description:</strong>
+              ${escapeHTML(booking.description)}</p>
+            <hr>
+            <p><strong>Worker:</strong>
+              ${escapeHTML(booking.workerName)}</p>
+            <p><strong>Worker skill:</strong>
+              ${escapeHTML(booking.workerSkill)}</p>
+            <p><strong>Booking received:</strong>
+              ${escapeHTML(formatDate(booking.createdAt))}</p>
+
+            <div class="admin-actions"></div>
+          `;
+
+          const actions = card.querySelector(".admin-actions");
+
+          function addAction(label, nextStatus, className) {
+            const button = document.createElement("button");
+            button.className = className;
+            button.textContent = label;
+
+            button.addEventListener("click", async () => {
+              if (!confirm(`Change booking status to ${nextStatus}?`)) {
+                return;
+              }
+
+              button.disabled = true;
+
+              try {
+                await F.updateDoc(
+                  F.doc(db, "bookings", booking.id),
+                  { status: nextStatus }
+                );
+
+                toast("Booking status updated to " + nextStatus + ".");
+                await loadBookings();
+              } catch (error) {
+                console.error("Booking update error:", error);
+                toast("Booking update failed: " +
+                  (error.code || error.message));
+                button.disabled = false;
+              }
+            });
+
+            actions.appendChild(button);
+          }
+
+          if (status === "pending") {
+            addAction("Confirm Booking", "confirmed", "approve-btn");
+            addAction("Reject Booking", "rejected", "reject-btn");
+          } else if (status === "confirmed") {
+            addAction("Mark Completed", "completed", "complete-btn");
+            addAction("Reject Booking", "rejected", "reject-btn");
+          }
+
+          bookingList.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Load bookings error:", error);
+        showEmpty(
+          bookingList,
+          "Could not load bookings: " + (error.code || error.message)
+        );
+      } finally {
+        loadingBookings = false;
+      }
+    }
+
+    document.querySelectorAll("[data-tab]").forEach(button => {
+      button.addEventListener("click", () => {
+        const tab = button.dataset.tab;
+
+        document.querySelectorAll("[data-tab]").forEach(item => {
+          item.classList.toggle("active", item === button);
+        });
+
+        workersSection.hidden = tab !== "workers";
+        bookingsSection.hidden = tab !== "bookings";
+
+        if (tab === "bookings") loadBookings();
+      });
+    });
 
     A.onAuthStateChanged(auth, async user => {
       if (!user) {
@@ -287,19 +463,23 @@
 
         if (role !== "admin") {
           showMessage("Access denied. Admin account required.");
+          workersSection.hidden = true;
+          bookingsSection.hidden = true;
           return;
         }
 
         currentUser = user;
+        showMessage("Admin access verified.");
         await loadWorkers();
-
       } catch (error) {
         console.error("Admin access error:", error);
         showMessage("Access check failed: " + error.message);
       }
     });
 
-    refreshBtn.addEventListener("click", loadWorkers);
+    refreshBtn.addEventListener("click", async () => {
+      await Promise.all([loadWorkers(), loadBookings()]);
+    });
   </script>
 </body>
   </html>

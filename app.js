@@ -140,6 +140,7 @@ export const home = (role) => {
   return destinations[role] || "/index.html";
 };
 
+
 // ===============================
 // NAVBAR CSS
 // ===============================
@@ -373,8 +374,7 @@ export function renderChrome() {
   `;
 
 
-  // Use existing containers when available.
-  // Otherwise, create the header and footer.
+  // HEADER
 
   let header = document.getElementById("site-header");
 
@@ -383,6 +383,9 @@ export function renderChrome() {
   } else if (!document.querySelector("body > .nav")) {
     document.body.insertAdjacentHTML("afterbegin", headerHTML);
   }
+
+
+  // FOOTER
 
   let footer = document.getElementById("site-footer");
 
@@ -453,24 +456,28 @@ export function renderChrome() {
     try {
       const role = await getRole(user);
 
+      // ROLE-BASED NAVIGATION BUTTONS
+
       authElement.innerHTML = `
-  <a href="${home(role)}">${t("dash")}</a>
+        <a href="${home(role)}">${t("dash")}</a>
 
-  ${role === "admin"
-    ? '<a href="/admin.html">Admin Panel</a>'
-    : ''}
+        ${role === "admin"
+          ? '<a href="/admin.html">Admin Panel</a>'
+          : ''}
 
-  ${role === "customer"
-    ? '<a href="/customer-dashboard.html">My Bookings</a>'
-    ${role === "worker"
-  ? '<a href="/worker-dashboard.html">Worker Dashboard</a>'
-      
-  : ''}
-    
+        ${role === "customer"
+          ? '<a href="/customer-dashboard.html">My Bookings</a>'
+          : ''}
 
-  <a href="#" id="lo">${t("logout")}</a>
-`;
-    
+        ${role === "worker"
+          ? '<a href="/worker-dashboard.html">Worker Dashboard</a>'
+          : ''}
+
+        <a href="#" id="lo">${t("logout")}</a>
+      `;
+
+
+      // LOGOUT
 
       const logoutButton = document.getElementById("lo");
 
@@ -519,4 +526,4 @@ export function guard(requiredRole) {
       location.href = "/login.html";
     }
   });
-   }
+    }

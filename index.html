@@ -424,27 +424,59 @@
 
     // RENDER SERVICE CARDS
     function renderCategories() {
-      cats.innerHTML = categories.map(category => `
-        <a
-          class="service-card"
-          href="./workers.html?cat=${encodeURIComponent(category.id)}"
-        >
-          <img
-            src="${esc(category.image)}"
-            alt="${esc(category.name)} service"
-            loading="lazy"
-            onerror="this.style.display='none'"
-          >
+  cats.innerHTML = categories.map(category => `
+    <a
+      class="service-card service-category-link"
+      href="./workers.html?cat=${encodeURIComponent(category.id)}"
+      data-category="${esc(category.id)}"
+    >
+      <img
+        src="${esc(category.image)}"
+        alt="${esc(category.name)} service"
+        loading="lazy"
+        onerror="this.style.display='none'"
+      >
 
-          <div class="service-card-info">
-            <div class="service-icon">${category.icon}</div>
-            <h3>${esc(category.name)}</h3>
-            <p>View professionals →</p>
-          </div>
-        </a>
-      `).join("");
+      <div class="service-card-info">
+        <div class="service-icon">${category.icon}</div>
+        <h3>${esc(category.name)}</h3>
+        <p>View professionals →</p>
+      </div>
+    </a>
+  `).join("");
+
+  document.querySelectorAll(".service-category-link")
+    .forEach(card => {
+      card.addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        const categoryId = card.dataset.category;
+
+        // Firebase auth state ka wait
+        const user = await new Promise(resolve => {
+          const unsubscribe = A.onAuthStateChanged(auth, currentUser => {
+            unsubscribe();
+            resolve(currentUser);
+          });
+        });
+
+        const workersUrl =
+          `./workers.html?cat=${encodeURIComponent(categoryId)}`;
+
+        if (user) {
+          // Already logged in
+          window.location.href = workersUrl;
+          return;
+        }
+
+        // New customer -> Login page
+        const loginUrl =
+          `./login.html?next=${encodeURIComponent(workersUrl)}`;
+
+        window.location.href = loginUrl;
+      });
+    });
     }
-
 
     // LOAD APPROVED WORKERS
     async function loadWorkers() {

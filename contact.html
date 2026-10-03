@@ -1,3 +1,330 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Contact – HunarSetu</title><meta name="description" content="HunarSetu: Local Skills. Local Work. Local Growth. Frontend demo."><link rel="stylesheet" href="css/styles.css"><script src="js/data.js" defer></script><script src="js/app.js" defer></script></head><body data-page="contact"><main id="main">
-<div class="wrap sec"><h1>Contact us</h1><p class="mut">Demo form: your message is not sent anywhere.</p><form class="card" id="cf" novalidate><label>Name<input name="name" autocomplete="name"></label><label>Email or mobile number<input name="contact"></label><label>Subject<input name="subject"></label><label>Message<textarea name="msg" rows="5"></textarea></label><button class="btn">Send (demo)</button><div class="ok" id="cf-ok" tabindex="-1" role="status" hidden>Demo only: thanks! Your message was not sent.</div></form></div>
-</main></body></html>
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Contact Us — HunarSetu</title>
+
+  <meta
+    name="description"
+    content="HunarSetu se contact karein. Local services, workers aur platform se judi madad ke liye humse sampark karein."
+  >
+
+  <link
+    rel="stylesheet"
+    href="./styles.css"
+  >
+</head>
+
+
+<body>
+
+  <!-- =========================
+       NAVBAR
+  ========================== -->
+
+  <div id="site-header"></div>
+
+
+  <main>
+
+    <!-- =========================
+         CONTACT HERO
+    ========================== -->
+
+    <section class="wrap sec">
+
+      <h1>Contact Us</h1>
+
+      <p class="mut">
+        HunarSetu se judi kisi bhi madad, suggestion ya
+        problem ke liye humse contact karein.
+      </p>
+
+
+      <!-- =========================
+           CONTACT FORM
+      ========================== -->
+
+      <form
+        class="card"
+        id="contactForm"
+        novalidate
+      >
+
+        <label for="name">
+          Name
+        </label>
+
+        <input
+          id="name"
+          name="name"
+          type="text"
+          autocomplete="name"
+          placeholder="Apna naam enter karein"
+          required
+        >
+
+
+        <label for="contact">
+          Email or Mobile Number
+        </label>
+
+        <input
+          id="contact"
+          name="contact"
+          type="text"
+          autocomplete="email"
+          placeholder="Email ya mobile number"
+          required
+        >
+
+
+        <label for="subject">
+          Subject
+        </label>
+
+        <input
+          id="subject"
+          name="subject"
+          type="text"
+          placeholder="Kis baare mein contact karna hai?"
+          required
+        >
+
+
+        <label for="message">
+          Message
+        </label>
+
+        <textarea
+          id="message"
+          name="message"
+          rows="6"
+          placeholder="Apna message likhein..."
+          required
+        ></textarea>
+
+
+        <p
+          class="err"
+          id="contactError"
+          role="alert"
+        ></p>
+
+
+        <button
+          class="btn"
+          id="contactBtn"
+          type="submit"
+        >
+          Send Message
+        </button>
+
+
+        <div
+          class="ok"
+          id="contactSuccess"
+          tabindex="-1"
+          role="status"
+          hidden
+        >
+          Thank you! Aapka message receive ho gaya.
+        </div>
+
+      </form>
+
+
+      <!-- =========================
+           CONTACT INFORMATION
+      ========================== -->
+
+      <div class="card" style="margin-top:20px;">
+
+        <h2>HunarSetu</h2>
+
+        <p class="mut">
+          Local Skills. Local Work. Local Growth.
+        </p>
+
+        <p>
+          📍 Jhalawar, Rajasthan
+        </p>
+
+        <p>
+          HunarSetu ka goal local customers ko
+          trusted local workers aur service providers
+          se connect karna hai.
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script type="module">
+
+    import {
+      renderChrome
+    } from "./app.js";
+
+
+    // Navbar
+    renderChrome();
+
+
+    // =========================================
+    // CONTACT FORM
+    // =========================================
+
+    const form =
+      document.getElementById("contactForm");
+
+    const errorBox =
+      document.getElementById("contactError");
+
+    const successBox =
+      document.getElementById("contactSuccess");
+
+    const button =
+      document.getElementById("contactBtn");
+
+
+    form.addEventListener(
+      "submit",
+      async (event) => {
+
+        event.preventDefault();
+
+
+        errorBox.textContent = "";
+
+        successBox.hidden = true;
+
+
+        const name =
+          document
+            .getElementById("name")
+            .value
+            .trim();
+
+
+        const contact =
+          document
+            .getElementById("contact")
+            .value
+            .trim();
+
+
+        const subject =
+          document
+            .getElementById("subject")
+            .value
+            .trim();
+
+
+        const message =
+          document
+            .getElementById("message")
+            .value
+            .trim();
+
+
+        // =====================================
+        // VALIDATION
+        // =====================================
+
+        if (!name) {
+
+          errorBox.textContent =
+            "Apna naam enter karein.";
+
+          return;
+
+        }
+
+
+        if (!contact) {
+
+          errorBox.textContent =
+            "Email ya mobile number enter karein.";
+
+          return;
+
+        }
+
+
+        if (!subject) {
+
+          errorBox.textContent =
+            "Subject enter karein.";
+
+          return;
+
+        }
+
+
+        if (!message) {
+
+          errorBox.textContent =
+            "Message enter karein.";
+
+          return;
+
+        }
+
+
+        // =====================================
+        // CURRENTLY DEMO
+        // =====================================
+
+        button.disabled = true;
+
+        button.textContent =
+          "Sending...";
+
+
+        /*
+          Abhi contact form ko Firebase
+          mein save nahi kar rahe hain.
+
+          Firebase contact messages ka system
+          baad mein Admin Panel ke saath add
+          kar sakte hain.
+        */
+
+
+        setTimeout(() => {
+
+          successBox.hidden = false;
+
+          successBox.textContent =
+            "Thank you! Aapka message receive ho gaya. Contact system jaldi fully connect kiya jayega.";
+
+          form.reset();
+
+          button.disabled = false;
+
+          button.textContent =
+            "Send Message";
+
+          successBox.focus();
+
+        }, 500);
+
+      }
+    );
+
+  </script>
+
+</body>
+
+</html>

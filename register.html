@@ -132,7 +132,20 @@ function getSafeNext() {
   }
 }
     if (params.get("role") === "worker") {
-      document.getElementById("role").value = "worker";
+
+  document.getElementById("role").value =
+    "worker";
+
+} else if (params.get("role") === "customer") {
+
+  document.getElementById("role").value =
+    "customer";
+
+  // Customer service booking flow me
+  // role selector ko change na karne dein.
+  document.getElementById("role").disabled =
+    true;
+
     }
 
     form.addEventListener("submit", async (event) => {

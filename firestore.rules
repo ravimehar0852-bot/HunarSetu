@@ -1,28 +1,155 @@
 rules_version = '2';
+
 service cloud.firestore {
+
   match /databases/{db}/documents {
-    function signed(){ return request.auth != null; }
-    function admin(){ return signed() && request.auth.token.admin == true; }
-    function me(uid){ return signed() && request.auth.uid == uid; }
+
+    // ================================
+    // HELPER FUNCTIONS
+    // ================================
+
+    function signed() {
+      return request.auth != null;
+    }
+
+    function admin() {
+      return signed() &&
+        request.auth.token.admin == true;
+    }
+
+    function me(uid) {
+      return signed() &&
+        request.auth.uid == uid;
+    }
+
+
+    // ================================
+    // USERS
+    // ================================
+
     match /users/{uid} {
+
+      // User can read own profile.
+      // Admin can read all user profiles.
       allow read: if me(uid) || admin();
-      // Role limited to customer/worker; admin comes only from a server-set custom claim.
-      allow create: if me(uid) && request.resource.data.role in ['customer','worker']
-        && request.resource.data.keys().hasOnly(['name','email','role','createdAt']);
-      allow update: if me(uid) && request.resource.data.role == resource.data.role
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role','status','verified']);
+
+
+      // Customer / worker can create own account.
+      allow create:
+        if me(uid)
+        && request.resource.data.role in ['customer', 'worker']
+        && request.resource.data.keys().hasOnly([
+          'name',
+          'email',
+          'role',
+          'createdAt'
+        ]);
+
+
+      // User can update own profile,
+      // but cannot change protected role/status fields.
+      allow update:
+        if me(uid)
+        && request.resource.data.role == resource.data.role
+        && !request.resource.data.diff(resource.data)
+          .affectedKeys()
+          .hasAny([
+            'role',
+            'status',
+            'verified'
+          ]);
+
+
+      // Nobody can delete user profiles.
+      allow delete: if admin();
     }
-    match /serviceCategories/{id} { allow read: if true; allow write: if admin(); }
+
+
+    // ================================
+    // SERVICE CATEGORIES
+    // ================================
+
+    match /serviceCategories/{id} {
+
+      allow read: if true;
+
+      allow write: if admin();
+    }
+
+
+    // ================================
+    // WORKER PROFILES
+    // ================================
+
     match /workerProfiles/{id} {
-      allow read: if resource.data.status == 'approved' || me(id) || admin();
-      allow create: if me(id) && request.resource.data.status == 'incomplete';
-      allow update: if admin() || (me(id) && request.resource.data.status == resource.data.status
-        && request.resource.data.verified == resource.data.verified);
+
+      // Approved workers are publicly readable.
+      // Worker can read own profile.
+      // Admin can read all profiles.
+      allow read:
+        if resource.data.status == 'approved'
+        || me(id)
+        || admin();
+
+
+      // Worker can create ONLY their own profile.
+      // New profiles must start as pending.
+      allow create:
+        if me(id)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.uid == request.auth.uid;
+
+
+      // Admin can approve/reject/update workers.
+      //
+      // Worker can update their own profile,
+      // but cannot change approval status.
+      allow update:
+        if admin()
+        || (
+          me(id)
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.status == resource.data.status
+        );
+
+
+      // Worker profile cannot be deleted by worker.
+      // Admin can delete if needed.
+      allow delete:
+        if admin();
     }
+
+
+    // ================================
+    // BOOKINGS
+    // ================================
+
     match /bookings/{id} {
-      allow read: if signed() && (resource.data.customerId == request.auth.uid || resource.data.workerId == request.auth.uid || admin());
-      allow write: if false; // created and updated only via Cloud Functions (next phase)
+
+      // Customer, worker involved in booking,
+      // or admin can read booking.
+      allow read:
+        if signed()
+        && (
+          resource.data.customerId == request.auth.uid
+          || resource.data.workerId == request.auth.uid
+          || admin()
+        );
+
+
+      // Booking creation/update will be handled
+      // by the existing application / future Cloud Functions.
+      allow write: if false;
     }
-    match /{document=**} { allow read, write: if false; }
+
+
+    // ================================
+    // DENY EVERYTHING ELSE
+    // ================================
+
+    match /{document=**} {
+
+      allow read, write: if false;
+    }
   }
 }

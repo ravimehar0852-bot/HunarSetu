@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Find Workers – HunarSetu</title>
+  <meta
+    name="description"
+    content="Find local service professionals in Jhalawar on HunarSetu."
+  >
+
+  <link rel="stylesheet" href="./styles.css">
+
+  <style>
+    .workers-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 35px 18px 60px;
+    }
+
+    .workers-hero {
+      padding: 28px 0;
+    }
+
+    .workers-hero h1 {
+      font-size: clamp(30px, 5vw, 46px);
+      margin: 0 0 12px;
+    }
+
+    .workers-hero p {
+      color: #64748b;
+      line-height: 1.7;
+    }
+
+    /* ---------- Nearby / location ---------- */
+    .nearby-box {
+      border: 1px solid #99f6e4;
+      background: #f0fdfa;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 8px 0 20px;
+    }
+
+    .location-btn {
+      display: block;
+      width: 100%;
+      min-height: 56px;
+      border: 0;
+      border-radius: 14px;
+      background: #0f766e;
+      color: white;
+      font: inherit;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .location-btn:disabled {
+      opacity: .7;
+      cursor: wait;
+    }
+
+    .location-status {
+      margin: 12px 0 0;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .location-status.ok {
+      color: #115e59;
+      font-weight: 700;
+    }
+
+    .location-status.err {
+      color: #b91c1c;
+    }
+
+    /* ---------- Map ---------- */
+    .map-section {
+      margin: 0 0 22px;
+    }
+
+    .map-section[hidden] {
+      display: none;
+    }
+
+    /* Fixed height keeps the map from covering the worker cards. */
+    #nearbyMap {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      border-radius: 16px;
+      border: 1px solid #cbd5e1;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .map-placeholder {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 18px;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    .map-placeholder strong {
+      display: block;
+      font-size: 18px;
+      color: #0f172a;
+    }
+
+    .worker-filters {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+      margin: 24px 0 18px;
+    }
+
+    .worker-filters input,
+    .worker-filters select {
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      padding: 13px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: white;
+      color: #0f172a;
+      font: inherit;
+    }
+
+    .worker-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin: 18px 0;
+    }
+
+    .worker-chip {
+      border: 1px solid #cbd5e1;
+      background: white;
+      color: #334155;
+      padding: 9px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .worker-chip.active {
+      background: #0f766e;
+      color: white;
+      border-color: #0f766e;
+    }
+
+    .workers-count {
+      color: #64748b;
+      margin: 18px 0;
+    }
+
+    .workers-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .worker-card {
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 5px 22px rgba(15, 23, 42, .05);
+      min-width: 0;
+      overflow-wrap: anywhere;
+      cursor: pointer;
+    }
+
+    .worker-card.selected {
+      border-color: #0f766e;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, .25);
+    }
+
+    .worker-distance {
+      display: inline-block;
+      background: #0f766e;
+      color: white;
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .worker-photo {
+      display: block;
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      background: #f1f5f9;
+    }
+
+    .worker-avatar {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: #ccfbf1;
+      color: #115e59;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      margin-bottom: 16px;
+    }
+
+    .worker-card h2 {
+      font-size: 21px;
+      margin: 0 0 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .worker-skill {
+      display: inline-block;
+      background: #ccfbf1;
+      color: #115e59;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 0 6px 12px 0;
+    }
+
+    .worker-detail {
+      margin: 9px 0;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .worker-contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 18px;
+    }
+
+    .worker-contact a {
+      flex: 1 1 100px;
+      text-align: center;
+      padding: 13px 8px;
+      min-height: 44px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      background: #0f766e;
+      color: white;
+      box-sizing: border-box;
+    }
+
+    .worker-contact a.secondary {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .worker-contact a.booking-btn {
+      background: #7c3aed;
+      color: white;
+      flex: 1 1 100%;
+      font-size: 17px;
+      padding: 15px 8px;
+    }
+
+    .workers-empty {
+      padding: 30px 18px;
+      text-align: center;
+      border: 1px dashed #cbd5e1;
+      border-radius: 16px;
+      color: #64748b;
+      background: white;
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 800px) {
+      .workers-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .worker-filters {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .worker-filters input {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .workers-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .worker-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .worker-filters input {
+        grid-column: auto;
+      }
+
+      #nearbyMap {
+        height: 220px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="site-header"></div>
+
+  <main class="workers-page">
+    <section class="workers-hero">
+      <h1 id="workersHeading">Find a Worker</h1>
+      <p id="workersDescription">
+        Find local service professionals in your area.
+        Search by name, skill, or location.
+      </p>
+    </section>
+
+    <!-- Nearby workers: customer location -->
+    <section class="nearby-box" aria-label="Nearby workers">
+      <button type="button" class="location-btn" id="useLocationBtn">
+        📍 Use My Location
+      </button>
+      <p class="location-status" id="locationStatus" role="status">
+        Tap the button to see approved workers nearest to you.
+      </p>
+    </section>
+
+    <!-- Map section (shows after location is detected) -->
+    <section class="map-section" id="mapSection" aria-label="Map" hidden>
+      <div id="nearbyMap">
+        <div class="map-placeholder" id="mapPlaceholder">
+          <div>
+            <strong>🗺️ Map coming soon</strong>
+            The worker list below is sorted by distance.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Search and filters">
+      <div class="worker-filters">
+        <input
+          id="workerSearch"
+          type="search"
+          placeholder="Search name, service or area..."
+          aria-label="Search workers"
+        >
+
+        <select id="workerArea" aria-label="Filter by area">
+          <option value="">All areas</option>
+        </select>
+
+        <select id="workerSort" aria-label="Sort workers">
+          <option value="relevance">Default order</option>
+          <option value="name">Name (A–Z)</option>
+          <option value="distance" disabled>Nearest first</option>
+        </select>
+      </div>
+
+      <div class="worker-chips" id="workerChips">
+        <button class="worker-chip active" data-skill="">
+          All Services
+        </button>
+      </div>
+    </section>
+
+    <p class="workers-count" id="workersCount" role="status">
+      Loading approved workers...
+    </p>
+
+    <section
+      class="workers-grid"
+      id="workersGrid"
+      aria-label="Approved workers"
+    ></section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <!--
+    ==================================================================
+    GOOGLE MAPS API KEY — ADD IT HERE LATER (optional)
+    ------------------------------------------------------------------
+    1. Create a *browser* key in Google Cloud Console and restrict it
+       to your domain (HTTP referrers), e.g. https://your-site.vercel.app/*
+       and enable "Maps JavaScript API". Browser keys are public by
+       design, so the HTTP-referrer restriction is what protects it.
+       NEVER use a server/secret key here.
+    2. Replace the empty string below with your key:
+         window.HUNARSETU_MAPS_KEY = "YOUR_RESTRICTED_BROWSER_KEY";
+    While it is empty, no Google script is loaded and the page works
+    normally with the distance-sorted list only.
+    ==================================================================
+  -->
+  <script>
+    window.HUNARSETU_MAPS_KEY = ""; // <-- ADD GOOGLE MAPS BROWSER KEY HERE
+  </script>
+
+  <script type="module">
+    import {
+      db,
+      F,
+      renderChrome
+    } from "./app.js";
+
+    const searchInput = document.getElementById("workerSearch");
+    const areaSelect = document.getElementById("workerArea");
+    const sortSelect = document.getElementById("workerSort");
+    const chips = document.getElementById("workerChips");
+    const grid = document.getElementById("workersGrid");
+    const count = document.getElementById("workersCount");
+    const heading = document.getElementById("workersHeading");
+    const description = document.getElementById("workersDescription");
+    const locationBtn = document.getElementById("useLocationBtn");
+    const locationStatus = document.getElementById("locationStatus");
+    const mapSection = document.getElementById("mapSection");
+    const mapEl = document.getElementById("nearbyMap");
+    const distanceOption = sortSelect.querySelector('[value="distance"]');
+
+    const params = new URLSearchParams(window.location.search);
+
+    let workers = [];
+    let selectedSkill = "";
+    let selectedCategory = (params.get("cat") || "").toLowerCase();
+    let userLocation = null; // { lat, lng } — kept in memory only
+    let selectedWorkerId = "";
+
+    // Map category IDs to names and common skills.
+    const categoryConfig = {
+      electrician: {
+        name: "Electrician",
+        keywords: [
+          "electrician", "electrical", "electric", "wiring", "wire",
+          "inverter", "switchboard", "geyser"
+        ]
+      },
+      plumber: {
+        name: "Plumber",
+        keywords: [
+          "plumber", "plumbing", "pipe", "tap", "bathroom fitting",
+          "leak", "water tank"
+        ]
+      },
+      carpenter: {
+        name: "Carpenter",
+        keywords: [
+          "carpenter", "carpentry", "wood", "furniture", "cupboard",
+          "door", "suthar"
+        ]
+      },
+      painter: {
+        name: "Painter",
+        keywords: ["painter", "painting", "paint", "putty", "wall"]
+      },
+      mechanic: {
+        name: "Mechanic",
+        keywords: [
+          "mechanic", "mechanical", "bike", "motorcycle", "two-wheeler",
+          "vehicle", "puncture", "automobile"
+        ]
+      },
+      ac: {
+        name: "AC Repair",
+        keywords: [
+          "ac", "a.c.", "air conditioner", "air conditioning",
+          "cooling", "refrigeration"
+        ]
+      },
+      tailor: {
+        name: "Tailor",
+        keywords: [
+          "tailor", "tailoring", "stitching", "sewing", "alteration",
+          "blouse"
+        ]
+      },
+      cleaner: {
+        name: "Home Cleaning",
+        keywords: [
+          "cleaner", "cleaning", "housekeeping", "deep clean",
+          "home cleaning", "sanitation"
+        ]
+      },
+      tutor: {
+        name: "Tutor",
+        keywords: [
+          "tutor", "teacher", "tuition", "teaching", "education",
+          "maths", "science"
+        ]
+      },
+      other: {
+        name: "Other Services",
+        keywords: []
+      }
+    };
+
+    function safe(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function normalize(value) {
+      return String(value ?? "")
+        .toLowerCase()
+        .trim()
+        .replace(/[_-]+/g, " ")
+        .replace(/\s+/g, " ");
+    }
+
+    function phoneNumber(value) {
+      return String(value ?? "").replace(/[^\d+]/g, "");
+    }
+
+    function showEmpty(message) {
+      grid.innerHTML = "";
+
+      const empty = document.createElement("div");
+      empty.className = "workers-empty";
+      empty.textContent = message;
+
+      grid.appendChild(empty);
+    }
+
+    // ---------- Distance helpers ----------
+
+    // Returns { lat, lng } if the worker has valid coordinates, else null.
+    function getWorkerCoords(worker) {
+      const lat = Number(worker.latitude);
+      const lng = Number(worker.longitude);
+
+      if (
+        worker.latitude === null || worker.latitude === undefined ||
+        worker.latitude === "" ||
+        worker.longitude === null || worker.longitude === undefined ||
+        worker.longitude === ""
+      ) {
+        return null;
+      }
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+      if (lat === 0 && lng === 0) return null;
+
+      return { lat, lng };
+    }
+
+    // Haversine formula — returns distance in kilometers.
+    function haversineKm(lat1, lng1, lat2, lng2) {
+      const R = 6371; // Earth radius in km
+      const toRad = deg => deg * Math.PI / 180;
+
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLng / 2) ** 2;
+
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function formatKm(km) {
+      return `${km.toFixed(1)} km`;
+    }
+
+    function getDistanceKm(worker) {
+      if (!userLocation) return null;
+
+      const coords = getWorkerCoords(worker);
+      if (!coords) return null;
+
+      return haversineKm(
+        userLocation.lat,
+        userLocation.lng,
+        coords.lat,
+        coords.lng
+      );
+    }
+
+    // ---------- Category helpers (unchanged logic) ----------
+
+    function getWorkerCategory(worker) {
+      return normalize(
+        worker.categoryId ||
+        worker.category ||
+        worker.serviceCategory ||
+        worker.cat ||
+        ""
+      );
+    }
+
+    function matchesCategory(worker, categoryId) {
+      if (!categoryId) return true;
+
+      const config = categoryConfig[categoryId];
+
+      if (!config) {
+        return false;
+      }
+
+      const storedCategory = getWorkerCategory(worker);
+      const categoryName = normalize(config.name);
+      const skill = normalize(worker.skill);
+      const combined = normalize([
+        worker.skill,
+        worker.description,
+        worker.name
+      ].filter(Boolean).join(" "));
+
+      // First check the explicit category field.
+      if (
+        storedCategory === normalize(categoryId) ||
+        storedCategory === categoryName
+      ) {
+        return true;
+      }
+
+      // "Other Services" should match only an explicit category.
+      if (categoryId === "other") {
+        return false;
+      }
+
+      // Match category-specific terms against the worker's skill.
+      return config.keywords.some(keyword =>
+        skill.includes(normalize(keyword))
+      ) || (
+        categoryId === "electrician" &&
+        combined.includes("electrical")
+      );
+    }
+
+    function buildFilters() {
+      const areas = [...new Set(
+        workers
+          .map(worker =>
+            String(worker.area || worker.city || "").trim()
+          )
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b));
+
+      const currentArea = areaSelect.value;
+
+      areaSelect.innerHTML =
+        '<option value="">All areas</option>' +
+        areas.map(area => `
+          <option value="${safe(area)}">${safe(area)}</option>
+        `).join("");
+
+      areaSelect.value = currentArea;
+
+      const skills = [...new Set(
+        workers
+          .map(worker => String(worker.skill || "").trim())
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b));
+
+      chips.innerHTML = `
+        <button
+          class="worker-chip ${!selectedSkill ? "active" : ""}"
+          data-skill=""
+        >
+          All Services
+        </button>
+
+        ${skills.map(skill => `
+          <button
+            class="worker-chip ${selectedSkill === skill ? "active" : ""}"
+            data-skill="${safe(skill)}"
+          >
+            ${safe(skill)}
+          </button>
+        `).join("")}
+      `;
+    }
+
+    // ---------- Render ----------
+
+    function renderWorkers() {
+      const search = normalize(searchInput.value);
+      const area = areaSelect.value;
+
+      let filtered = workers.filter(worker => {
+        const searchable = normalize([
+          worker.name,
+          worker.skill,
+          worker.area,
+          worker.city,
+          worker.description,
+          worker.experience,
+          worker.category,
+          worker.categoryId,
+          worker.serviceCategory
+        ].filter(Boolean).join(" "));
+
+        const matchesSearch = searchable.includes(search);
+
+        const workerArea = String(
+          worker.area || worker.city || ""
+        ).trim();
+
+        const matchesArea = !area || workerArea === area;
+
+        const matchesSelectedCategory =
+          matchesCategory(worker, selectedCategory);
+
+        const matchesSelectedSkill =
+          !selectedSkill || worker.skill === selectedSkill;
+
+        return (
+          matchesSearch &&
+          matchesArea &&
+          matchesSelectedCategory &&
+          matchesSelectedSkill
+        );
+      });
+
+      let skippedNoLocation = 0;
+
+      if (userLocation) {
+        // Nearby mode: only workers with valid coordinates.
+        const withDistance = filtered
+          .map(worker => ({ worker, km: getDistanceKm(worker) }))
+          .filter(item => item.km !== null);
+
+        skippedNoLocation = filtered.length - withDistance.length;
+
+        if (sortSelect.value === "name") {
+          withDistance.sort((a, b) =>
+            String(a.worker.name || "")
+              .localeCompare(String(b.worker.name || ""))
+          );
+        } else {
+          withDistance.sort((a, b) => a.km - b.km);
+        }
+
+        filtered = withDistance.map(item => {
+          item.worker._km = item.km;
+          return item.worker;
+        });
+      } else if (sortSelect.value === "name") {
+        filtered.sort((a, b) =>
+          String(a.name || "").localeCompare(String(b.name || ""))
+        );
+      }
+
+      count.textContent = userLocation
+        ? `${filtered.length} nearby worker` +
+          `${filtered.length === 1 ? "" : "s"} found, nearest first` +
+          (skippedNoLocation
+            ? ` (${skippedNoLocation} without location not shown)`
+            : "")
+        : `${filtered.length} approved worker` +
+          `${filtered.length === 1 ? "" : "s"} found`;
+
+      updateMap(filtered);
+
+      if (!filtered.length) {
+        showEmpty(
+          workers.length
+            ? "No workers match this service or your filters. Try another search."
+            : "No approved workers are available yet. Please check again later."
+        );
+        return;
+      }
+
+      grid.innerHTML = filtered.map(worker => {
+        const phone = phoneNumber(worker.phone);
+        const whatsappPhone = phone.replace(/\D/g, "");
+
+        // Only area/city is shown — never raw GPS coordinates.
+        const location = [
+          worker.area,
+          worker.city
+        ].filter(Boolean).join(", ");
+
+        const photo =
+          worker.photoURL ||
+          worker.photoUrl ||
+          worker.profileImage ||
+          worker.imageUrl ||
+          "";
+
+        const photoHTML = photo
+          ? `
+            <img
+              class="worker-photo"
+              src="${safe(photo)}"
+              alt="${safe(worker.name || "Worker")}"
+              loading="lazy"
+              onerror="this.style.display='none'"
+            >
+          `
+          : `
+            <div class="worker-avatar" aria-hidden="true">👤</div>
+          `;
+
+        const distanceHTML = userLocation && typeof worker._km === "number"
+          ? `<div class="worker-distance">📍 ${formatKm(worker._km)} away</div>`
+          : "";
+
+        return `
+          <article
+            class="worker-card ${worker.id === selectedWorkerId ? "selected" : ""}"
+            data-worker-id="${safe(worker.id)}"
+          >
+            ${distanceHTML}
+            ${photoHTML}
+
+            <span class="worker-skill">
+              ${safe(worker.skill || "Local Service")}
+            </span>
+
+            <h2>${safe(worker.name || "Service Professional")}</h2>
+
+            <p class="worker-detail">
+              <strong>Location:</strong>
+              ${safe(location || "Not specified")}
+            </p>
+
+            <p class="worker-detail">
+              <strong>Experience:</strong>
+              ${safe(
+                typeof worker.experience === "number"
+                  ? (worker.experience === 0
+                      ? "Fresher"
+                      : worker.experience + (worker.experience === 1 ? " year" : " years"))
+                  : (worker.experience || "Not specified")
+              )}
+            </p>
+
+            <p class="worker-detail">
+              ${safe(
+                worker.description ||
+                "Local service professional."
+              )}
+            </p>
+
+            <div class="worker-contact">
+              ${
+                phone
+                  ? `
+                    <a href="tel:${safe(phone)}">Call Worker</a>
+
+                    <a
+                      class="secondary"
+                      href="https://wa.me/${safe(whatsappPhone)}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      WhatsApp
+                    </a>
+                  `
+                  : ""
+              }
+
+              <a
+                class="booking-btn"
+                href="./booking.html?worker=${encodeURIComponent(worker.id)}"
+              >
+                Book Now
+              </a>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    // ---------- Select a worker (tap a card) ----------
+
+    grid.addEventListener("click", event => {
+      // Let call / WhatsApp / Book Now links work normally.
+      if (event.target.closest("a")) return;
+
+      const card = event.target.closest(".worker-card");
+      if (!card) return;
+
+      selectedWorkerId = card.dataset.workerId || "";
+
+      grid.querySelectorAll(".worker-card").forEach(el => {
+        el.classList.toggle("selected", el === card);
+      });
+
+      focusMapOnWorker(selectedWorkerId);
+    });
+
+    // ---------- Customer location ----------
+
+    function setStatus(message, type = "") {
+      locationStatus.textContent = message;
+      locationStatus.className = "location-status" + (type ? " " + type : "");
+    }
+
+    function requestLocation() {
+      if (!("geolocation" in navigator)) {
+        setStatus(
+          "Your browser does not support location. You can still browse all workers below.",
+          "err"
+        );
+        return;
+      }
+
+      locationBtn.disabled = true;
+      locationBtn.textContent = "📍 Detecting location...";
+      setStatus("Please allow location access when your browser asks.");
+
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+
+          locationBtn.disabled = false;
+          locationBtn.textContent = "📍 Update My Location";
+          setStatus("📍 Your location detected", "ok");
+
+          distanceOption.disabled = false;
+          sortSelect.value = "distance";
+
+          mapSection.hidden = false;
+          renderWorkers();
+        },
+        error => {
+          locationBtn.disabled = false;
+          locationBtn.textContent = "📍 Use My Location";
+
+          const messages = {
+            1: "Location permission was denied. Allow location access in your browser settings and try again.",
+            2: "Could not detect your location. Check that GPS is on and try again.",
+            3: "Location request timed out. Please try again."
+          };
+
+          setStatus(
+            messages[error.code] || "Could not get your location.",
+            "err"
+          );
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 60000
+        }
+      );
+    }
+
+    locationBtn.addEventListener("click", requestLocation);
+
+    // ---------- Map (Google Maps optional) ----------
+
+    let googleMap = null;
+    let mapMarkers = new Map();
+    let mapLoading = false;
+
+    // Marker positions are rounded (~1 km) so a worker's exact GPS
+    // location is never exposed to customers, even in page source.
+    function approxCoords(worker) {
+      const coords = getWorkerCoords(worker);
+      if (!coords) return null;
+
+      return {
+        lat: Math.round(coords.lat * 100) / 100,
+        lng: Math.round(coords.lng * 100) / 100
+      };
+    }
+
+    function loadGoogleMaps() {
+      const key = window.HUNARSETU_MAPS_KEY;
+
+      // No key yet -> keep the placeholder, list still works.
+      if (!key || mapLoading || (window.google && window.google.maps)) {
+        return Promise.resolve(Boolean(window.google && window.google.maps));
+      }
+
+      mapLoading = true;
+
+      return new Promise(resolve => {
+        window.gm_authFailure = () => resolve(false);
+
+        const script = document.createElement("script");
+        script.src =
+          "https://maps.googleapis.com/maps/api/js?key=" +
+          encodeURIComponent(key) +
+          "&loading=async";
+        script.async = true;
+        script.onload = () => resolve(Boolean(window.google && window.google.maps));
+        script.onerror = () => resolve(false);
+        document.head.appendChild(script);
+      });
+    }
+
+    async function updateMap(list) {
+      if (!userLocation) return;
+
+      try {
+        const ready = await loadGoogleMaps();
+        if (!ready) return; // placeholder stays visible
+
+        if (!googleMap) {
+          mapEl.innerHTML = "";
+          googleMap = new google.maps.Map(mapEl, {
+            center: userLocation,
+            zoom: 13,
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: false,
+            gestureHandling: "cooperative"
+          });
+        }
+
+        mapMarkers.forEach(marker => marker.setMap(null));
+        mapMarkers = new Map();
+
+        const bounds = new google.maps.LatLngBounds();
+
+        const me = new google.maps.Marker({
+          position: userLocation,
+          map: googleMap,
+          title: "You",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "#2563eb",
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 2
+          }
+        });
+        mapMarkers.set("__me", me);
+        bounds.extend(userLocation);
+
+        list.forEach(worker => {
+          const position = approxCoords(worker);
+          if (!position) return;
+
+          const marker = new google.maps.Marker({
+            position,
+            map: googleMap,
+            title: worker.name || "Worker"
+          });
+
+          marker.addListener("click", () => {
+            selectedWorkerId = worker.id;
+            const card = grid.querySelector(
+              `[data-worker-id="${CSS.escape(worker.id)}"]`
+            );
+            grid.querySelectorAll(".worker-card").forEach(el =>
+              el.classList.toggle("selected", el === card)
+            );
+            if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+
+          mapMarkers.set(worker.id, marker);
+          bounds.extend(position);
+        });
+
+        if (list.length) googleMap.fitBounds(bounds, 40);
+      } catch (error) {
+        // Never break the page if the map fails.
+        console.warn("Map unavailable:", error);
+      }
+    }
+
+    function focusMapOnWorker(id) {
+      try {
+        const marker = mapMarkers.get(id);
+        if (googleMap && marker) {
+          googleMap.panTo(marker.getPosition());
+        }
+      } catch (error) {
+        console.warn("Map focus failed:", error);
+      }
+    }
+
+    // ---------- Existing events ----------
+
+    chips.addEventListener("click", event => {
+      const button = event.target.closest("[data-skill]");
+      if (!button) return;
+
+      selectedSkill = button.dataset.skill || "";
+
+      // Selecting "All Services" clears the category URL filter too.
+      if (!selectedSkill) {
+        selectedCategory = "";
+        heading.textContent = "Find a Worker";
+        description.textContent =
+          "Find local service professionals in your area.";
+      }
+
+      chips.querySelectorAll(".worker-chip").forEach(chip => {
+        chip.classList.toggle("active", chip === button);
+      });
+
+      renderWorkers();
+    });
+
+    searchInput.addEventListener("input", renderWorkers);
+    areaSelect.addEventListener("change", renderWorkers);
+    sortSelect.addEventListener("change", renderWorkers);
+
+    async function loadWorkers() {
+      count.textContent = "Loading approved workers...";
+      grid.innerHTML = "";
+
+      try {
+        renderChrome();
+
+        if (selectedCategory && categoryConfig[selectedCategory]) {
+          heading.textContent =
+            categoryConfig[selectedCategory].name + " Professionals";
+
+          description.textContent =
+            "Explore approved professionals for this service in your area.";
+        }
+
+        // Load only approved worker profiles.
+        const result = await F.getDocs(
+          F.query(
+            F.collection(db, "workerProfiles"),
+            F.where("status", "==", "approved")
+          )
+        );
+
+        workers = result.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        // Read search and area filters from the URL, if provided.
+        const initialSearch = params.get("q") || "";
+        const initialCity = params.get("city") || "";
+
+        searchInput.value = initialSearch;
+
+        buildFilters();
+
+        if (initialCity) {
+          const matchingArea = [...areaSelect.options].find(
+            option =>
+              normalize(option.value) === normalize(initialCity)
+          );
+
+          if (matchingArea) {
+            areaSelect.value = matchingArea.value;
+          }
+        }
+
+        renderWorkers();
+
+      } catch (error) {
+        console.error("Workers load error:", error);
+
+        count.textContent = "Unable to load workers.";
+
+        showEmpty(
+          "Could not load workers. Please refresh the page and try again."
+        );
+      }
+    }
+
+    loadWorkers();
+  </script>
+</body>
+</html>

@@ -106,6 +106,31 @@
     // Respect worker role when redirected from a worker signup link
     const params = new URLSearchParams(location.search);
 
+    const next = params.get("next");
+
+function getSafeNext() {
+
+  if (!next) {
+    return null;
+  }
+
+  try {
+
+    const url =
+      new URL(next, window.location.origin);
+
+    if (url.origin !== window.location.origin) {
+      return null;
+    }
+
+    return url.pathname +
+      url.search +
+      url.hash;
+
+  } catch {
+    return null;
+  }
+}
     if (params.get("role") === "worker") {
       document.getElementById("role").value = "worker";
     }

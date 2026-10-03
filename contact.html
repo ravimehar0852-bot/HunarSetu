@@ -35,7 +35,7 @@
   <main>
 
     <!-- =========================
-         CONTACT HERO
+         CONTACT SECTION
     ========================== -->
 
     <section class="wrap sec">
@@ -43,20 +43,70 @@
       <h1>Contact Us</h1>
 
       <p class="mut">
-        HunarSetu se judi kisi bhi madad, suggestion ya
-        problem ke liye humse contact karein.
+        HunarSetu se judi kisi bhi madad, suggestion
+        ya problem ke liye humse contact karein.
       </p>
+
+
+      <!-- =========================
+           CONTACT DETAILS
+      ========================== -->
+
+      <div class="card">
+
+        <h2>HunarSetu</h2>
+
+        <p class="mut">
+          Local Skills. Local Work. Local Growth.
+        </p>
+
+
+        <p>
+          📍 <strong>Location:</strong>
+          Jhalawar, Rajasthan
+        </p>
+
+
+        <p>
+          📧 <strong>Email:</strong>
+          <a href="mailto:aiabhi263@gmail.com">
+            aiabhi263@gmail.com
+          </a>
+        </p>
+
+
+        <p>
+          📱 <strong>Phone:</strong>
+          <a href="tel:+918504843164">
+            +91 8504843164
+          </a>
+        </p>
+
+
+        <p>
+          HunarSetu ka goal local customers ko
+          trusted local workers aur service providers
+          se connect karna hai.
+        </p>
+
+      </div>
 
 
       <!-- =========================
            CONTACT FORM
       ========================== -->
 
+      <div style="height:20px;"></div>
+
+
       <form
         class="card"
         id="contactForm"
         novalidate
       >
+
+        <h2>Send us a Message</h2>
+
 
         <label for="name">
           Name
@@ -80,7 +130,6 @@
           id="contact"
           name="contact"
           type="text"
-          autocomplete="email"
           placeholder="Email ya mobile number"
           required
         >
@@ -140,35 +189,14 @@
 
       </form>
 
-
-      <!-- =========================
-           CONTACT INFORMATION
-      ========================== -->
-
-      <div class="card" style="margin-top:20px;">
-
-        <h2>HunarSetu</h2>
-
-        <p class="mut">
-          Local Skills. Local Work. Local Growth.
-        </p>
-
-        <p>
-          📍 Jhalawar, Rajasthan
-        </p>
-
-        <p>
-          HunarSetu ka goal local customers ko
-          trusted local workers aur service providers
-          se connect karna hai.
-        </p>
-
-      </div>
-
     </section>
 
   </main>
 
+
+  <!-- =========================
+       JAVASCRIPT
+  ========================== -->
 
   <script type="module">
 
@@ -177,7 +205,7 @@
     } from "./app.js";
 
 
-    // Navbar
+    // Navbar load
     renderChrome();
 
 
@@ -186,16 +214,27 @@
     // =========================================
 
     const form =
-      document.getElementById("contactForm");
+      document.getElementById(
+        "contactForm"
+      );
+
 
     const errorBox =
-      document.getElementById("contactError");
+      document.getElementById(
+        "contactError"
+      );
+
 
     const successBox =
-      document.getElementById("contactSuccess");
+      document.getElementById(
+        "contactSuccess"
+      );
+
 
     const button =
-      document.getElementById("contactBtn");
+      document.getElementById(
+        "contactBtn"
+      );
 
 
     form.addEventListener(
@@ -283,7 +322,7 @@
 
 
         // =====================================
-        // CURRENTLY DEMO
+        // DEMO SUBMISSION
         // =====================================
 
         button.disabled = true;
@@ -292,22 +331,12 @@
           "Sending...";
 
 
-        /*
-          Abhi contact form ko Firebase
-          mein save nahi kar rahe hain.
-
-          Firebase contact messages ka system
-          baad mein Admin Panel ke saath add
-          kar sakte hain.
-        */
-
-
         setTimeout(() => {
 
           successBox.hidden = false;
 
           successBox.textContent =
-            "Thank you! Aapka message receive ho gaya. Contact system jaldi fully connect kiya jayega.";
+            "Thank you! Aapka message receive ho gaya.";
 
           form.reset();
 

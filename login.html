@@ -3,48 +3,163 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>Login — HunarSetu</title>
-  <link rel="stylesheet" href="styles.css">
+
+  <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body>
+
   <main class="wrap">
-    <form class="auth card" id="f" novalidate>
+
+    <div class="auth card">
+
       <h1>Login</h1>
 
-      <label for="email">Email</label>
-      <input
-        id="email"
-        type="email"
-        autocomplete="email"
-        required
-      >
+      <p>
+        HunarSetu par login karke service book karein.
+      </p>
 
-      <label for="pw">Password</label>
-      <input
-        id="pw"
-        type="password"
-        autocomplete="current-password"
-        minlength="8"
-        required
-      >
+      <!-- =========================
+           MOBILE OTP LOGIN
+      ========================== -->
 
-      <p class="err" id="err" role="alert"></p>
+      <section id="phoneSection">
 
-      <button class="btn" id="go" type="submit">
-        Login
-      </button>
+        <h3>📱 Mobile Number se Login</h3>
+
+        <label for="phone">
+          Mobile Number
+        </label>
+
+        <input
+          id="phone"
+          type="tel"
+          inputmode="numeric"
+          autocomplete="tel"
+          placeholder="9876543210"
+          maxlength="10"
+        >
+
+        <div id="recaptcha-container"></div>
+
+        <button
+          class="btn"
+          id="sendOtp"
+          type="button"
+        >
+          Send OTP
+        </button>
+
+        <div id="otpBox" style="display:none;">
+
+          <label for="otp">
+            OTP
+          </label>
+
+          <input
+            id="otp"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            placeholder="6 digit OTP"
+            maxlength="6"
+          >
+
+          <button
+            class="btn"
+            id="verifyOtp"
+            type="button"
+          >
+            Verify OTP
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <div style="text-align:center;margin:20px 0;">
+        <strong>OR</strong>
+      </div>
+
+
+      <!-- =========================
+           EMAIL LOGIN
+      ========================== -->
+
+      <form id="emailForm" novalidate>
+
+        <h3>📧 Email se Login</h3>
+
+        <label for="email">
+          Email
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          autocomplete="email"
+        >
+
+        <label for="pw">
+          Password
+        </label>
+
+        <input
+          id="pw"
+          type="password"
+          autocomplete="current-password"
+          minlength="8"
+        >
+
+        <button
+          class="btn"
+          id="go"
+          type="submit"
+        >
+          Login with Email
+        </button>
+
+      </form>
+
+
+      <!-- =========================
+           ERROR
+      ========================== -->
+
+      <p
+        class="err"
+        id="err"
+        role="alert"
+      ></p>
+
 
       <p>
         New here?
-        <a href="register.html">Create an account</a>
+
+        <a
+          id="createAccountLink"
+          href="register.html"
+        >
+          Create an account
+        </a>
+
         ·
-        <a href="forgot-password.html">Forgot password?</a>
+
+        <a href="forgot-password.html">
+          Forgot password?
+        </a>
       </p>
-    </form>
+
+    </div>
+
   </main>
 
+
   <script type="module">
+
     import {
       renderChrome,
       auth,
@@ -55,14 +170,140 @@
       home
     } from "./app.js";
 
+
     renderChrome();
 
-    const form = document.getElementById("f");
-    const errorBox = document.getElementById("err");
-    const submitBtn = document.getElementById("go");
+
+    // =========================================
+    // ELEMENTS
+    // =========================================
+
+    const errorBox =
+      document.getElementById("err");
+
+    const emailForm =
+      document.getElementById("emailForm");
+
+    const submitBtn =
+      document.getElementById("go");
+
+    const phoneInput =
+      document.getElementById("phone");
+
+    const sendOtpBtn =
+      document.getElementById("sendOtp");
+
+    const otpBox =
+      document.getElementById("otpBox");
+
+    const otpInput =
+      document.getElementById("otp");
+
+    const verifyOtpBtn =
+      document.getElementById("verifyOtp");
+
+
+    // =========================================
+    // RETURN / SELECTED SERVICE
+    // =========================================
+
+    const params =
+      new URLSearchParams(location.search);
+
+    const next =
+      params.get("next");
+
+
+    function getSafeNext() {
+
+      if (!next) {
+        return null;
+      }
+
+      try {
+
+        const url =
+          new URL(
+            next,
+            window.location.origin
+          );
+
+        if (
+          url.origin !==
+          window.location.origin
+        ) {
+          return null;
+        }
+
+        return (
+          url.pathname +
+          url.search +
+          url.hash
+        );
+
+      } catch {
+
+        return null;
+
+      }
+
+    }
+
+
+    const safeNext =
+      getSafeNext();
+
+
+    // Create account link
+    const createAccountLink =
+      document.getElementById(
+        "createAccountLink"
+      );
+
+
+    if (safeNext) {
+
+      createAccountLink.href =
+        "./register.html?role=customer&next=" +
+        encodeURIComponent(
+          safeNext
+        );
+
+    }
+
+
+    // =========================================
+    // REDIRECT FUNCTION
+    // =========================================
+
+    function redirectAfterLogin(role) {
+
+      if (
+        safeNext &&
+        role === "customer"
+      ) {
+
+        window.location.href =
+          safeNext;
+
+      } else {
+
+        window.location.href =
+          home(role);
+
+      }
+
+    }
+
+
+    // =========================================
+    // ERROR MESSAGE
+    // =========================================
 
     function errorMessage(error) {
+
       const messages = {
+
         "auth/invalid-credential":
           "Email ya password galat hai.",
 
@@ -81,98 +322,505 @@
         "auth/network-request-failed":
           "Internet connection check karo.",
 
+        "auth/invalid-phone-number":
+          "Valid 10 digit mobile number enter karo.",
+
+        "auth/invalid-verification-code":
+          "OTP galat hai.",
+
+        "auth/code-expired":
+          "OTP expire ho gaya. Dobara OTP bhejo.",
+
+        "auth/operation-not-allowed":
+          "Firebase me Phone Authentication enable nahi hai.",
+
+        "auth/captcha-check-failed":
+          "reCAPTCHA verification failed. Dobara try karo.",
+
         "permission-denied":
           "Firestore permission issue hai. Firebase Rules check karo."
+
       };
 
-      return messages[error.code] ||
+
+      return (
+        messages[error.code] ||
         error.message ||
-        "Login nahi ho paya. Dobara try karo.";
+        "Login nahi ho paya. Dobara try karo."
+      );
+
     }
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
 
-      errorBox.textContent = "";
+    // =========================================
+    // EMAIL LOGIN
+    // =========================================
 
-      const email =
-        document.getElementById("email").value.trim();
+    emailForm.addEventListener(
+      "submit",
+      async (event) => {
 
-      const password =
-        document.getElementById("pw").value;
+        event.preventDefault();
 
-      if (!email || !password) {
-        errorBox.textContent =
-          "Email aur password dono enter karo.";
+        errorBox.textContent = "";
+
+        const email =
+          document
+            .getElementById("email")
+            .value
+            .trim();
+
+        const password =
+          document
+            .getElementById("pw")
+            .value;
+
+
+        if (!email || !password) {
+
+          errorBox.textContent =
+            "Email aur password dono enter karo.";
+
+          return;
+
+        }
+
+
+        submitBtn.disabled = true;
+
+        submitBtn.textContent =
+          "Logging in...";
+
+
+        try {
+
+          const credential =
+            await A.signInWithEmailAndPassword(
+              auth,
+              email,
+              password
+            );
+
+
+          const user =
+            credential.user;
+
+
+          const userRef =
+            F.doc(
+              db,
+              "users",
+              user.uid
+            );
+
+
+          const userSnap =
+            await F.getDoc(
+              userRef
+            );
+
+
+          let role;
+
+
+          if (
+            userSnap.exists()
+          ) {
+
+            role =
+              userSnap.data().role;
+
+          } else {
+
+            const guessedName =
+              user.displayName ||
+              (
+                user.email
+                  ? user.email.split("@")[0]
+                  : "Customer"
+              );
+
+
+            const name =
+              guessedName.trim().length >= 2
+                ? guessedName.trim()
+                : "Customer";
+
+
+            role =
+              "customer";
+
+
+            await F.setDoc(
+              userRef,
+              {
+                uid: user.uid,
+                name: name,
+                email: user.email,
+                role: role,
+                emailVerified:
+                  user.emailVerified,
+                createdAt:
+                  F.serverTimestamp()
+              }
+            );
+
+          }
+
+
+          if (
+            ![
+              "customer",
+              "worker",
+              "admin"
+            ].includes(role)
+          ) {
+
+            throw new Error(
+              "Account role valid nahi hai. Support se contact karo."
+            );
+
+          }
+
+
+          redirectAfterLogin(
+            role
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "Email login error:",
+            error
+          );
+
+
+          errorBox.textContent =
+            errorMessage(error);
+
+
+          submitBtn.disabled =
+            false;
+
+
+          submitBtn.textContent =
+            "Login with Email";
+
+        }
+
+      }
+    );
+
+
+    // =========================================
+    // FIREBASE PHONE AUTH
+    // =========================================
+
+    let confirmationResult =
+      null;
+
+
+    let recaptchaVerifier =
+      null;
+
+
+    function setupRecaptcha() {
+
+      if (
+        recaptchaVerifier
+      ) {
         return;
       }
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Logging in...";
 
-      try {
-        // 1. Firebase Authentication login
-        const credential =
-          await A.signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-          );
+      recaptchaVerifier =
+        new A.RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          {
+            size: "normal",
 
-        const user = credential.user;
+            callback: () => {
 
-        // 2. Check whether Firestore profile exists
-        const userRef = F.doc(db, "users", user.uid);
-        const userSnap = await F.getDoc(userRef);
+              console.log(
+                "reCAPTCHA verified"
+              );
 
-        let role;
+            },
 
-        if (userSnap.exists()) {
-          role = userSnap.data().role;
-        } else {
-          // Registration may have created Auth account
-          // but failed to save the Firestore profile.
-          const guessedName =
-            user.displayName ||
-            (user.email ? user.email.split("@")[0] : "Customer");
+            "expired-callback": () => {
 
-          const name =
-            guessedName.trim().length >= 2
-              ? guessedName.trim()
-              : "Customer";
+              errorBox.textContent =
+                "reCAPTCHA expire ho gaya. Dobara try karo.";
 
-          role = "customer";
+            }
 
-          await F.setDoc(userRef, {
-            uid: user.uid,
-            name: name,
-            email: user.email,
-            role: role,
-            emailVerified: user.emailVerified,
-            createdAt: F.serverTimestamp()
-          });
+          }
+        );
+
+    }
+
+
+    // =========================================
+    // SEND OTP
+    // =========================================
+
+    sendOtpBtn.addEventListener(
+      "click",
+      async () => {
+
+        errorBox.textContent = "";
+
+
+        const phone =
+          phoneInput.value.trim();
+
+
+        if (
+          !/^[6-9]\d{9}$/.test(phone)
+        ) {
+
+          errorBox.textContent =
+            "Valid 10 digit Indian mobile number enter karo.";
+
+          return;
+
         }
 
-        // 3. Validate role
-        if (!["customer", "worker", "admin"].includes(role)) {
-          throw new Error(
-            "Account role valid nahi hai. Support se contact karo."
+
+        sendOtpBtn.disabled =
+          true;
+
+        sendOtpBtn.textContent =
+          "Sending OTP...";
+
+
+        try {
+
+          setupRecaptcha();
+
+
+          const fullPhone =
+            "+91" + phone;
+
+
+          confirmationResult =
+            await A.signInWithPhoneNumber(
+              auth,
+              fullPhone,
+              recaptchaVerifier
+            );
+
+
+          otpBox.style.display =
+            "block";
+
+
+          sendOtpBtn.textContent =
+            "OTP Sent ✓";
+
+
+          sendOtpBtn.disabled =
+            false;
+
+
+          phoneInput.disabled =
+            true;
+
+
+        } catch (error) {
+
+          console.error(
+            "OTP error:",
+            error
           );
+
+
+          errorBox.textContent =
+            errorMessage(error);
+
+
+          sendOtpBtn.disabled =
+            false;
+
+
+          sendOtpBtn.textContent =
+            "Send OTP";
+
+
+          if (
+            recaptchaVerifier
+          ) {
+
+            try {
+
+              recaptchaVerifier.clear();
+
+            } catch {}
+
+            recaptchaVerifier =
+              null;
+
+          }
+
         }
 
-        // 4. Redirect
-        location.href = home(role);
-
-      } catch (error) {
-        console.error("Login error:", error);
-
-        errorBox.textContent =
-          errorMessage(error);
-
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Login";
       }
-    });
+    );
+
+
+    // =========================================
+    // VERIFY OTP
+    // =========================================
+
+    verifyOtpBtn.addEventListener(
+      "click",
+      async () => {
+
+        errorBox.textContent = "";
+
+
+        const otp =
+          otpInput.value.trim();
+
+
+        if (
+          !/^\d{6}$/.test(otp)
+        ) {
+
+          errorBox.textContent =
+            "6 digit OTP enter karo.";
+
+          return;
+
+        }
+
+
+        if (
+          !confirmationResult
+        ) {
+
+          errorBox.textContent =
+            "Pehle OTP send karo.";
+
+          return;
+
+        }
+
+
+        verifyOtpBtn.disabled =
+          true;
+
+        verifyOtpBtn.textContent =
+          "Verifying...";
+
+
+        try {
+
+          const result =
+            await confirmationResult.confirm(
+              otp
+            );
+
+
+          const user =
+            result.user;
+
+
+          // =================================
+          // CREATE / GET CUSTOMER PROFILE
+          // =================================
+
+          const userRef =
+            F.doc(
+              db,
+              "users",
+              user.uid
+            );
+
+
+          const userSnap =
+            await F.getDoc(
+              userRef
+            );
+
+
+          let role;
+
+
+          if (
+            userSnap.exists()
+          ) {
+
+            role =
+              userSnap.data().role ||
+              "customer";
+
+          } else {
+
+            await F.setDoc(
+              userRef,
+              {
+                uid: user.uid,
+                name: "Customer",
+                phone: user.phoneNumber || "",
+                role: "customer",
+                createdAt:
+                  F.serverTimestamp()
+              }
+            );
+
+
+            role =
+              "customer";
+
+          }
+
+
+          if (
+            role !== "customer" &&
+            role !== "worker" &&
+            role !== "admin"
+          ) {
+
+            throw new Error(
+              "Account role valid nahi hai."
+            );
+
+          }
+
+
+          redirectAfterLogin(
+            role
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "OTP verification error:",
+            error
+          );
+
+
+          errorBox.textContent =
+            errorMessage(error);
+
+
+          verifyOtpBtn.disabled =
+            false;
+
+
+          verifyOtpBtn.textContent =
+            "Verify OTP";
+
+        }
+
+      }
+    );
+
   </script>
+
 </body>
-</html>
+  </html>

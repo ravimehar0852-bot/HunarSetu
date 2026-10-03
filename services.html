@@ -14,13 +14,96 @@
 
   <meta
     name="description"
-    content="HunarSetu par local services aur skilled workers ko discover karein."
+    content="HunarSetu par Jhalawar ke local skilled professionals aur services discover karein."
   >
 
   <link
     rel="stylesheet"
     href="./styles.css"
   >
+
+  <style>
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .service-card {
+      display: block;
+      overflow: hidden;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      text-decoration: none;
+      color: #172033;
+      box-shadow: 0 5px 18px rgba(15, 23, 42, .06);
+      transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+    }
+
+    .service-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, .10);
+    }
+
+    .service-card img {
+      width: 100%;
+      height: 145px;
+      object-fit: cover;
+      display: block;
+      background: #e5e7eb;
+    }
+
+    .service-card-info {
+      padding: 13px;
+    }
+
+    .service-icon {
+      font-size: 25px;
+      margin-bottom: 5px;
+    }
+
+    .service-card h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .service-card p {
+      margin: 6px 0 0;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .services-note {
+      margin-top: 25px;
+    }
+
+    @media (min-width: 650px) {
+
+      .services-grid {
+        grid-template-columns:
+          repeat(3, minmax(0, 1fr));
+      }
+
+      .service-card img {
+        height: 175px;
+      }
+
+    }
+
+    @media (min-width: 950px) {
+
+      .services-grid {
+        grid-template-columns:
+          repeat(4, minmax(0, 1fr));
+      }
+
+    }
+
+  </style>
 
 </head>
 
@@ -42,274 +125,389 @@
 
     <section class="wrap sec">
 
-      <h1>
-        Our Services
-      </h1>
+      <div class="section-heading">
 
-      <p class="mut">
-        Apni zarurat ki service choose karein
-        aur apne area ke skilled workers dekhein.
-      </p>
+        <div>
 
+          <span class="eyebrow">
+            Explore services
+          </span>
 
-      <!-- =========================
-           SERVICES GRID
-      ========================== -->
+          <h1>
+            Service Categories
+          </h1>
 
-      <div
-        class="grid"
-        id="servicesGrid"
-      >
-
-        <!-- Electrician -->
-        <a
-          class="card service-card"
-          href="./workers.html?cat=electrician"
-          data-category="electrician"
-        >
-
-          <div style="font-size:42px;">
-            ⚡
-          </div>
-
-          <h3>
-            Electrician
-          </h3>
-
-          <p class="mut">
-            Wiring, switch, fan, light aur
-            electrical repair.
+          <p>
+            Apni zarurat ki service choose karein
+            aur local professional find karein.
           </p>
 
-        </a>
-
-
-        <!-- Plumber -->
-        <a
-          class="card service-card"
-          href="./workers.html?cat=plumber"
-          data-category="plumber"
-        >
-
-          <div style="font-size:42px;">
-            🚰
-          </div>
-
-          <h3>
-            Plumber
-          </h3>
-
-          <p class="mut">
-            Pipe, tap, water leakage aur
-            plumbing repair.
-          </p>
-
-        </a>
-
-
-        <!-- Carpenter -->
-        <a
-          class="card service-card"
-          href="./workers.html?cat=carpenter"
-          data-category="carpenter"
-        >
-
-          <div style="font-size:42px;">
-            🪚
-          </div>
-
-          <h3>
-            Carpenter
-          </h3>
-
-          <p class="mut">
-            Furniture, door, window aur
-            wood work.
-          </p>
-
-        </a>
-
-
-        <!-- Painter -->
-        <a
-          class="card service-card"
-          href="./workers.html?cat=painter"
-          data-category="painter"
-        >
-
-          <div style="font-size:42px;">
-            🎨
-          </div>
-
-          <h3>
-            Painter
-          </h3>
-
-          <p class="mut">
-            Home painting, wall painting aur
-            decoration work.
-          </p>
-
-        </a>
-
-
-        <!-- Mechanic -->
-        <a
-          class="card service-card"
-          href="./workers.html?cat=mechanic"
-          data-category="mechanic"
-        >
-
-          <div style="font-size:42px;">
-            🔧
-          </div>
-
-          <h3>
-            Mechanic
-          </h3>
-
-          <p class="mut">
-            Bike, scooter aur vehicle
-            repair services.
-          </p>
-
-        </a>
-
-
-        <!-- AC -->
-        <a
-          class="card service-card"
-          href="./workers.html?cat=ac"
-          data-category="ac"
-        >
-
-          <div style="font-size:42px;">
-            ❄️
-          </div>
-
-          <h3>
-            AC Service
-          </h3>
-
-          <p class="mut">
-            AC repair, servicing, installation
-            aur maintenance.
-          </p>
-
-        </a>
-
-
-        <!-- Tailor -->
-        <a
-          class="card service-card"
-          href="./workers.html?cat=tailor"
-          data-category="tailor"
-        >
-
-          <div style="font-size:42px;">
-            ✂️
-          </div>
-
-          <h3>
-            Tailor
-          </h3>
-
-          <p class="mut">
-            Stitching, alteration aur
-            custom tailoring.
-          </p>
-
-        </a>
-
-
-        <!-- Cleaner -->
-        <a
-          class="card service-card"
-          href="./workers.html?cat=cleaner"
-          data-category="cleaner"
-        >
-
-          <div style="font-size:42px;">
-            🧹
-          </div>
-
-          <h3>
-            Cleaner
-          </h3>
-
-          <p class="mut">
-            Home, office aur general
-            cleaning services.
-          </p>
-
-        </a>
-
-
-        <!-- Tutor -->
-        <a
-          class="card service-card"
-          href="./workers.html?cat=tutor"
-          data-category="tutor"
-        >
-
-          <div style="font-size:42px;">
-            📚
-          </div>
-
-          <h3>
-            Tutor
-          </h3>
-
-          <p class="mut">
-            School subjects aur
-            private tuition.
-          </p>
-
-        </a>
-
-
-        <!-- Other -->
-        <a
-          class="card service-card"
-          href="./workers.html?cat=other"
-          data-category="other"
-        >
-
-          <div style="font-size:42px;">
-            🛠️
-          </div>
-
-          <h3>
-            Other Services
-          </h3>
-
-          <p class="mut">
-            Dusri local services ke liye
-            yahan explore karein.
-          </p>
-
-        </a>
+        </div>
 
       </div>
 
 
       <!-- =========================
-           INFORMATION
+           SERVICES
       ========================== -->
 
       <div
-        class="notice"
-        style="margin-top:30px;"
+        class="services-grid"
+        id="servicesGrid"
+      >
+
+
+        <!-- ELECTRICIAN -->
+
+        <a
+          class="service-card service-category-link"
+          href="./workers.html?cat=electrician"
+          data-category="electrician"
+        >
+
+          <img
+            src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=700&q=80"
+            alt="Electrician service"
+            loading="lazy"
+          >
+
+          <div class="service-card-info">
+
+            <div class="service-icon">
+              ⚡
+            </div>
+
+            <h3>
+              Electrician
+            </h3>
+
+            <p>
+              Wiring, fan, light aur electrical repair
+            </p>
+
+          </div>
+
+        </a>
+
+
+        <!-- PLUMBER -->
+
+        <a
+          class="service-card service-category-link"
+          href="./workers.html?cat=plumber"
+          data-category="plumber"
+        >
+
+          <img
+            src="https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?auto=format&fit=crop&w=700&q=80"
+            alt="Plumber service"
+            loading="lazy"
+          >
+
+          <div class="service-card-info">
+
+            <div class="service-icon">
+              🚰
+            </div>
+
+            <h3>
+              Plumber
+            </h3>
+
+            <p>
+              Pipe, tap, leakage aur plumbing repair
+            </p>
+
+          </div>
+
+        </a>
+
+
+        <!-- CARPENTER -->
+
+        <a
+          class="service-card service-category-link"
+          href="./workers.html?cat=carpenter"
+          data-category="carpenter"
+        >
+
+          <img
+            src="https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=700&q=80"
+            alt="Carpenter service"
+            loading="lazy"
+          >
+
+          <div class="service-card-info">
+
+            <div class="service-icon">
+              🪚
+            </div>
+
+            <h3>
+              Carpenter
+            </h3>
+
+            <p>
+              Furniture, door, window aur wood work
+            </p>
+
+          </div>
+
+        </a>
+
+
+        <!-- PAINTER -->
+
+        <a
+          class="service-card service-category-link"
+          href="./workers.html?cat=painter"
+          data-category="painter"
+        >
+
+          <img
+            src="https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=700&q=80"
+            alt="Painter service"
+            loading="lazy"
+          >
+
+          <div class="service-card-info">
+
+            <div class="service-icon">
+              🎨
+            </div>
+
+            <h3>
+              Painter
+            </h3>
+
+            <p>
+              Home, wall painting aur decoration work
+            </p>
+
+          </div>
+
+        </a>
+
+
+        <!-- MECHANIC -->
+
+        <a
+          class="service-card service-category-link"
+          href="./workers.html?cat=mechanic"
+          data-category="mechanic"
+        >
+
+          <img
+            src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=700&q=80"
+            alt="Mechanic service"
+            loading="lazy"
+          >
+
+          <div class="service-card-info">
+
+            <div class="service-icon">
+              🔧
+            </div>
+
+            <h3>
+              Mechanic
+            </h3>
+
+            <p>
+              Bike, scooter aur vehicle repair
+            </p>
+
+          </div>
+
+        </a>
+
+
+        <!-- AC -->
+
+        <a
+          class="service-card service-category-link"
+          href="./workers.html?cat=ac"
+          data-category="ac"
+        >
+
+          <img
+            src="https://images.unsplash.com/photo-1631545806609-7c3c8f9f7a3b?auto=format&fit=crop&w=700&q=80"
+            alt="AC repair service"
+            loading="lazy"
+          >
+
+          <div class="service-card-info">
+
+            <div class="service-icon">
+              ❄️
+            </div>
+
+            <h3>
+              AC Repair
+            </h3>
+
+            <p>
+              AC repair, servicing aur installation
+            </p>
+
+          </div>
+
+        </a>
+
+
+        <!-- TAILOR -->
+
+        <a
+          class="service-card service-category-link"
+          href="./workers.html?cat=tailor"
+          data-category="tailor"
+        >
+
+          <img
+            src="https://images.unsplash.com/photo-1590736969955-71cc94901144?auto=format&fit=crop&w=700&q=80"
+            alt="Tailor service"
+            loading="lazy"
+          >
+
+          <div class="service-card-info">
+
+            <div class="service-icon">
+              🧵
+            </div>
+
+            <h3>
+              Tailor
+            </h3>
+
+            <p>
+              Stitching, alteration aur tailoring
+            </p>
+
+          </div>
+
+        </a>
+
+
+        <!-- CLEANER -->
+
+        <a
+          class="service-card service-category-link"
+          href="./workers.html?cat=cleaner"
+          data-category="cleaner"
+        >
+
+          <img
+            src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=700&q=80"
+            alt="Home cleaning service"
+            loading="lazy"
+          >
+
+          <div class="service-card-info">
+
+            <div class="service-icon">
+              🧹
+            </div>
+
+            <h3>
+              Home Cleaning
+            </h3>
+
+            <p>
+              Home, office aur general cleaning
+            </p>
+
+          </div>
+
+        </a>
+
+
+        <!-- TUTOR -->
+
+        <a
+          class="service-card service-category-link"
+          href="./workers.html?cat=tutor"
+          data-category="tutor"
+        >
+
+          <img
+            src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=700&q=80"
+            alt="Tutor service"
+            loading="lazy"
+          >
+
+          <div class="service-card-info">
+
+            <div class="service-icon">
+              📚
+            </div>
+
+            <h3>
+              Tutor
+            </h3>
+
+            <p>
+              School subjects aur private tuition
+            </p>
+
+          </div>
+
+        </a>
+
+
+        <!-- OTHER -->
+
+        <a
+          class="service-card service-category-link"
+          href="./workers.html?cat=other"
+          data-category="other"
+        >
+
+          <img
+            src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=700&q=80"
+            alt="Other local services"
+            loading="lazy"
+          >
+
+          <div class="service-card-info">
+
+            <div class="service-icon">
+              ✨
+            </div>
+
+            <h3>
+              Other Services
+            </h3>
+
+            <p>
+              Aur bhi local services explore karein
+            </p>
+
+          </div>
+
+        </a>
+
+
+      </div>
+
+
+      <!-- =========================
+           HOW IT WORKS
+      ========================== -->
+
+      <div
+        class="notice services-note"
       >
 
         <strong>
-          HunarSetu kaise kaam karta hai?
+          HunarSetu par service kaise book karein?
         </strong>
 
         <p style="margin-bottom:0;">
-          Service choose karein → Login/Create Account karein
-          → Apne area ke workers dekhein → Suitable worker
-          select karke service book karein.
+          Service choose karein →
+          Login/Create Account karein →
+          Local professionals dekhein →
+          Suitable worker select karein →
+          Booking request bhejein.
         </p>
 
       </div>
@@ -342,7 +540,7 @@
 
     const serviceCards =
       document.querySelectorAll(
-        ".service-card"
+        ".service-category-link"
       );
 
 
@@ -351,37 +549,56 @@
 
         card.addEventListener(
           "click",
-          (event) => {
+          async (event) => {
 
             event.preventDefault();
 
 
-            const category =
+            const categoryId =
               card.dataset.category;
 
 
-            const workerUrl =
+            const workersUrl =
               "./workers.html?cat=" +
               encodeURIComponent(
-                category
+                categoryId
               );
 
 
             // =================================
-            // USER LOGIN CHECK
+            // FIREBASE AUTH STATE CHECK
             // =================================
 
             const user =
-              auth.currentUser;
+              await new Promise(
+                (resolve) => {
 
+                  const unsubscribe =
+                    A.onAuthStateChanged(
+                      auth,
+                      (currentUser) => {
+
+                        unsubscribe();
+
+                        resolve(
+                          currentUser
+                        );
+
+                      }
+                    );
+
+                }
+              );
+
+
+            // =================================
+            // ALREADY LOGGED IN
+            // =================================
 
             if (user) {
 
-              // Already logged in
-              // Directly workers page
-
               window.location.href =
-                workerUrl;
+                workersUrl;
 
               return;
 
@@ -392,13 +609,10 @@
             // NOT LOGGED IN
             // =================================
 
-            // Login ke baad isi service par
-            // wapas aayega
-
             const loginUrl =
               "./login.html?next=" +
               encodeURIComponent(
-                workerUrl
+                workersUrl
               );
 
 

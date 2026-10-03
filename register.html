@@ -214,8 +214,18 @@ function getSafeNext() {
         // 3. Send email verification
         await A.sendEmailVerification(user);
 
-        // 4. Redirect to the appropriate page
-        location.href = home(role);
+        // 4. Redirect
+const safeNext = getSafeNext();
+
+if (safeNext && role === "customer") {
+
+  location.href = safeNext;
+
+} else {
+
+  location.href = home(role);
+
+}
 } catch (error) {
   console.error("Registration error:", error);
 

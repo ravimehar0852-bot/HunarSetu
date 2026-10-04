@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Dashboard | HunarSetu</title>
+
+  <link rel="stylesheet" href="./styles.css">
+
+  <style>
+    :root {
+      --admin-bg: #f5f7fb;
+      --admin-card: #ffffff;
+      --admin-text: #172033;
+      --admin-muted: #64748b;
+      --admin-border: #e2e8f0;
+
+      --blue: #2563eb;
+      --green: #15803d;
+      --red: #dc2626;
+      --orange: #c2410c;
+      --purple: #7c3aed;
+      --dark: #0f172a;
+    }
+
+    body {
+      background: var(--admin-bg);
+      color: var(--admin-text);
+      margin: 0;
+    }
+
+    .admin-container {
+      width: min(1150px, 94%);
+      margin: 28px auto;
+      padding-bottom: 50px;
+    }
+
+    .admin-heading { margin-bottom: 22px; }
+    .admin-heading h1 { margin: 0 0 8px; font-size: clamp(25px, 5vw, 36px); }
+    .admin-heading p { color: var(--admin-muted); margin: 0; }
+
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 12px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #16a34a;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .35; }
+    }
+
+    /* Stats */
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px;
+      margin: 22px 0;
+    }
+
+    .stat-card {
+      background: white;
+      border: 1px solid var(--admin-border);
+      border-radius: 15px;
+      padding: 17px;
+    }
+
+    .stat-card span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 27px;
+      color: var(--dark);
+    }
+
+    /* Notice */
+    .admin-notice {
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      border-radius: 12px;
+      padding: 13px;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    /* Tabs */
+    .admin-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 20px;
+    }
+
+    .admin-tab {
+      border: 1px solid var(--admin-border);
+      background: white;
+      color: var(--admin-text);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .admin-tab.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: white;
+    }
+
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+
+    /* Cards */
+    .admin-list { display: grid; gap: 15px; }
+
+    .admin-card {
+      background: var(--admin-card);
+      border: 1px solid var(--admin-border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .admin-card h3 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      overflow-wrap: anywhere;
+    }
+
+    .admin-card p {
+      margin: 7px 0;
+      color: #475569;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .admin-card strong { color: var(--admin-text); }
+
+    /* Status */
+    .admin-badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 6px 10px;
+      margin: 5px 0 12px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-confirmed { background: #dbeafe; color: #1d4ed8; }
+    .status-working { background: #ede9fe; color: #6d28d9; }
+    .status-completion_requested { background: #ffedd5; color: #9a3412; }
+    .status-completed,
+    .status-approved { background: #dcfce7; color: #166534; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+
+    /* Timeline */
+    .booking-timeline {
+      margin: 16px 0;
+      padding: 14px;
+      background: #f8fafc;
+      border: 1px solid var(--admin-border);
+      border-radius: 12px;
+    }
+
+    .timeline-title {
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: var(--dark);
+    }
+
+    .timeline-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 7px 0;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 13px;
+    }
+
+    .timeline-row:last-child { border-bottom: 0; }
+    .timeline-label { color: #475569; font-weight: 700; }
+    .timeline-value { color: #0f172a; text-align: right; }
+
+    /* Buttons */
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    .admin-btn {
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      color: white;
+      background: var(--blue);
+    }
+
+    .admin-btn:disabled { opacity: .55; cursor: not-allowed; }
+    .admin-btn.success { background: var(--green); }
+    .admin-btn.danger { background: var(--red); }
+    .admin-btn.warning { background: var(--orange); }
+    .admin-btn.purple { background: var(--purple); }
+    .admin-btn.dark { background: var(--dark); }
+
+    /* Empty / message */
+    .admin-message {
+      background: white;
+      border: 1px solid var(--admin-border);
+      border-radius: 12px;
+      padding: 18px;
+      color: var(--admin-muted);
+    }
+
+    .section-title { margin: 0 0 12px; font-size: 21px; }
+    .small-note { color: var(--admin-muted); font-size: 13px; }
+
+    .worker-location {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 850px) {
+      .admin-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .admin-container { width: 92%; margin-top: 20px; }
+      .admin-card { padding: 15px; }
+      .admin-btn { flex: 1 1 140px; }
+      .timeline-row { flex-direction: column; gap: 3px; }
+      .timeline-value { text-align: left; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="admin-container">
+
+    <header class="admin-heading">
+      <h1>Admin Dashboard</h1>
+
+      <p>
+        HunarSetu platform control center.
+        Monitor bookings, workers and completion requests.
+      </p>
+
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        LIVE DATA
+      </div>
+    </header>
+
+
+    <div class="admin-stats">
+
+      <div class="stat-card">
+        <span>Total Bookings</span>
+        <strong id="totalBookings">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Pending Bookings</span>
+        <strong id="pendingBookings">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Active Work</span>
+        <strong id="activeBookings">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Completion Requests</span>
+        <strong id="completionBookings">0</strong>
+      </div>
+
+    </div>
+
+
+    <div class="admin-notice">
+      <strong>Admin monitoring:</strong>
+      Worker booking ko accept karega, phir work start karega,
+      aur kaam complete hone ke baad completion request bhejega.
+      Admin yahan poora status aur timeline dekh sakta hai.
+    </div>
+
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="bookings">📋 All Bookings</button>
+      <button class="admin-tab" data-tab="completion">✅ Completion Requests</button>
+      <button class="admin-tab" data-tab="workers">👷 Workers</button>
+      <button class="admin-tab" data-tab="applications">📝 Applications</button>
+    </div>
+
+
+    <section class="admin-section active" id="bookingsSection">
+      <h2 class="section-title">All Bookings</h2>
+
+      <div class="admin-list" id="bookingsList">
+        <div class="admin-message">Loading bookings...</div>
+      </div>
+    </section>
+
+
+    <section class="admin-section" id="completionSection">
+      <h2 class="section-title">Completion Requests</h2>
+
+      <p class="small-note">
+        Sirf woh bookings yahan dikhengi jinke worker ne completion request bheji hai.
+      </p>
+
+      <div class="admin-list" id="completionList">
+        <div class="admin-message">Loading completion requests...</div>
+      </div>
+    </section>
+
+
+    <section class="admin-section" id="workersSection">
+      <h2 class="section-title">Approved Workers</h2>
+
+      <div class="admin-list" id="workersList">
+        <div class="admin-message">Loading workers...</div>
+      </div>
+    </section>
+
+
+    <section class="admin-section" id="applicationsSection">
+      <h2 class="section-title">Pending Worker Applications</h2>
+
+      <div class="admin-list" id="applicationsList">
+        <div class="admin-message">Loading applications...</div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <script type="module">
+
+    import {
+      A,
+      F,
+      db,
+      renderChrome,
+      getRole
+    } from "./app.js";
+
+
+    const bookingsList = document.getElementById("bookingsList");
+    const completionList = document.getElementById("completionList");
+    const workersList = document.getElementById("workersList");
+    const applicationsList = document.getElementById("applicationsList");
+
+    const totalBookings = document.getElementById("totalBookings");
+    const pendingBookings = document.getElementById("pendingBookings");
+    const activeBookings = document.getElementById("activeBookings");
+    const completionBookings = document.getElementById("completionBookings");
+
+
+    let currentUser = null;
+    let bookings = [];
+    let workers = [];
+    let unsubBookings = null;
+    let unsubWorkers = null;
+    let busyIds = new Set();
+
+
+    function escapeHTML(value = "") {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+
+    function prettyStatus(status = "pending") {
+      const labels = {
+        pending: "Pending",
+        confirmed: "Accepted",
+        working: "Working",
+        completion_requested: "Completion Requested",
+        completed: "Completed",
+        rejected: "Rejected",
+        approved: "Approved"
+      };
+
+      return labels[status] || status.replaceAll("_", " ");
+    }
+
+
+    function statusBadge(status = "pending") {
+      return `
+        <span class="admin-badge status-${escapeHTML(status)}">
+          ${escapeHTML(prettyStatus(status))}
+        </span>
+      `;
+    }
+
+
+    function showMessage(container, message) {
+      container.innerHTML = `
+        <div class="admin-message">
+          ${escapeHTML(message)}
+        </div>
+      `;
+    }
+
+
+    function formatDate(value) {
+      if (!value) return "Not available";
+
+      try {
+        const date =
+          typeof value.toDate === "function"
+            ? value.toDate()
+            : new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+          return "Not available";
+        }
+
+        return date.toLocaleString("en-IN", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        });
+
+      } catch {
+        return "Not available";
+      }
+    }
+
+
+    function callButton(phone) {
+      if (!phone) return "";
+
+      return `
+        <a class="admin-btn success" href="tel:${escapeHTML(phone)}">
+          📞 Call
+        </a>
+      `;
+    }
+
+
+    function whatsappButton(phone) {
+      if (!phone) return "";
+
+      const cleanPhone = String(phone).replace(/\D/g, "");
+
+      return `
+        <a
+          class="admin-btn"
+          target="_blank"
+          rel="noopener"
+          href="https://wa.me/${escapeHTML(cleanPhone)}"
+        >
+          💬 WhatsApp
+        </a>
+      `;
+    }
+
+
+    function renderTimeline(booking) {
+      return `
+        <div class="booking-timeline">
+
+          <div class="timeline-title">📍 Booking Timeline</div>
+
+          <div class="timeline-row">
+            <span class="timeline-label">Booking Created</span>
+            <span class="timeline-value">
+              ${escapeHTML(formatDate(booking.createdAt))}
+            </span>
+          </div>
+
+          <div class="timeline-row">
+            <span class="timeline-label">Worker Accepted</span>
+            <span class="timeline-value">
+              ${
+                booking.acceptedAt
+                  ? `✅ ${escapeHTML(formatDate(booking.acceptedAt))}`
+                  : "— Not accepted yet"
+              }
+            </span>
+          </div>
+
+          <div class="timeline-row">
+            <span class="timeline-label">Work Started</span>
+            <span class="timeline-value">
+              ${
+                booking.startedAt
+                  ? `🔵 ${escapeHTML(formatDate(booking.startedAt))}`
+                  : "— Not started"
+              }
+            </span>
+          </div>
+
+          <div class="timeline-row">
+            <span class="timeline-label">Completion Requested</span>
+            <span class="timeline-value">
+              ${
+                booking.completionRequestedAt
+                  ? `🟠 ${escapeHTML(formatDate(booking.completionRequestedAt))}`
+                  : "— Not requested"
+              }
+            </span>
+          </div>
+
+          <div class="timeline-row">
+            <span class="timeline-label">Completed</span>
+            <span class="timeline-value">
+              ${
+                booking.completedAt
+                  ? `✅ ${escapeHTML(formatDate(booking.completedAt))}`
+                  : "— Not completed"
+              }
+            </span>
+          </div>
+
+        </div>
+      `;
+    }
+
+
+    function renderBookingCard(booking) {
+
+      const status = booking.status || "pending";
+
+      let actions = "";
+
+      /*
+       * IMPORTANT:
+       * Worker booking accept/reject karega.
+       * Admin normal pending booking ko accept nahi karega.
+       */
+
+      if (status === "completion_requested") {
+        actions = `
+          <button
+            class="admin-btn success"
+            data-complete="${escapeHTML(booking.id)}"
+          >
+            ✅ Confirm Completed
+          </button>
+
+          <button
+            class="admin-btn warning"
+            data-review="${escapeHTML(booking.id)}"
+          >
+            🔍 Send for Review
+          </button>
+        `;
+      }
+
+      return `
+        <article class="admin-card">
+
+          <h3>${escapeHTML(booking.customerName || "Customer")}</h3>
+
+          ${statusBadge(status)}
+
+          <p>
+            <strong>Service:</strong>
+            ${escapeHTML(booking.workerSkill || "Not specified")}
+          </p>
+
+          <p>
+            <strong>Worker:</strong>
+            ${escapeHTML(booking.workerName || "Not specified")}
+          </p>
+
+          <p>
+            <strong>Customer Email:</strong>
+            ${escapeHTML(booking.customerEmail || "Not provided")}
+          </p>
+
+          <p>
+            <strong>Phone:</strong>
+            ${escapeHTML(booking.phone || "Not provided")}
+          </p>
+
+          <p>
+            <strong>Address:</strong>
+            ${escapeHTML(booking.address || "Not provided")}
+          </p>
+
+          <p>
+            <strong>Service Date:</strong>
+            ${escapeHTML(booking.serviceDate || "Not specified")}
+          </p>
+
+          <p>
+            <strong>Description:</strong>
+            ${escapeHTML(booking.description || "No description")}
+          </p>
+
+          ${renderTimeline(booking)}
+
+          <div class="admin-actions">
+            ${callButton(booking.phone)}
+            ${whatsappButton(booking.phone)}
+            ${actions}
+          </div>
+
+        </article>
+      `;
+    }
+
+
+    function renderBookings() {
+
+      if (!bookings.length) {
+        showMessage(bookingsList, "Abhi koi booking nahi hai.");
+        showMessage(completionList, "Abhi koi completion request nahi hai.");
+        return;
+      }
+
+      const sorted = [...bookings].sort((a, b) => {
+        const aTime = a.createdAt?.toMillis?.() || 0;
+        const bTime = b.createdAt?.toMillis?.() || 0;
+        return bTime - aTime;
+      });
+
+      bookingsList.innerHTML = sorted.map(renderBookingCard).join("");
+
+      const completionRequests = sorted.filter(
+        booking => booking.status === "completion_requested"
+      );
+
+      if (!completionRequests.length) {
+        showMessage(
+          completionList,
+          "Abhi koi completion request pending nahi hai."
+        );
+      } else {
+        completionList.innerHTML =
+          completionRequests.map(renderBookingCard).join("");
+      }
+
+      totalBookings.textContent = bookings.length;
+
+      pendingBookings.textContent =
+        bookings.filter(b => b.status === "pending").length;
+
+      activeBookings.textContent =
+        bookings.filter(
+          b => b.status === "confirmed" || b.status === "working"
+        ).length;
+
+      completionBookings.textContent = completionRequests.length;
+    }
+
+
+    function renderWorkers() {
+
+      const approved = workers.filter(
+        worker => worker.status === "approved"
+      );
+
+      if (!approved.length) {
+        showMessage(workersList, "Abhi koi approved worker nahi hai.");
+        return;
+      }
+
+      workersList.innerHTML = approved.map(worker => {
+
+        const availability = worker.availability || "offline";
+
+        return `
+          <article class="admin-card">
+
+            <h3>${escapeHTML(worker.name || "Worker")}</h3>
+
+            ${statusBadge("approved")}
+
+            <p>
+              <strong>Skill:</strong>
+              ${escapeHTML(worker.skill || "Not specified")}
+            </p>
+
+            <p>
+              <strong>Phone:</strong>
+              ${escapeHTML(worker.phone || "Not provided")}
+            </p>
+
+            <p>
+              <strong>Email:</strong>
+              ${escapeHTML(worker.email || "Not provided")}
+            </p>
+
+            <p>
+              <strong>Availability:</strong>
+              ${escapeHTML(availability)}
+            </p>
+
+            <p>
+              <strong>Completed Tasks:</strong>
+              ${escapeHTML(worker.completedTasks ?? 0)}
+            </p>
+
+            <div class="worker-location">
+              <strong>📍 Location</strong>
+              <p>
+                ${escapeHTML(
+                  [worker.area, worker.city, worker.state, worker.pincode]
+                    .filter(Boolean)
+                    .join(", ") || "Location not provided"
+                )}
+              </p>
+            </div>
+
+            <p class="small-note">
+              Last active:
+              ${escapeHTML(formatDate(worker.lastActiveAt))}
+            </p>
+
+            <div class="admin-actions">
+              ${callButton(worker.phone)}
+              ${whatsappButton(worker.phone)}
+            </div>
+
+          </article>
+        `;
+
+      }).join("");
+    }
+
+
+    function renderApplications() {
+
+      const pending = workers.filter(
+        worker => worker.status === "pending"
+      );
+
+      if (!pending.length) {
+        showMessage(
+          applicationsList,
+          "Koi pending worker application nahi hai."
+        );
+        return;
+      }
+
+      applicationsList.innerHTML = pending.map(worker => `
+        <article class="admin-card">
+
+          <h3>${escapeHTML(worker.name || "Worker")}</h3>
+
+          ${statusBadge("pending")}
+
+          <p>
+            <strong>Skill:</strong>
+            ${escapeHTML(worker.skill || "Not specified")}
+          </p>
+
+          <p>
+            <strong>Experience:</strong>
+            ${escapeHTML(worker.experience || "Not specified")}
+          </p>
+
+          <p>
+            <strong>Phone:</strong>
+            ${escapeHTML(worker.phone || "Not provided")}
+          </p>
+
+          <p>
+            <strong>Email:</strong>
+            ${escapeHTML(worker.email || "Not provided")}
+          </p>
+
+          <p>
+            <strong>Location:</strong>
+            ${escapeHTML(
+              [worker.area, worker.city, worker.state, worker.pincode]
+                .filter(Boolean)
+                .join(", ") || "Not provided"
+            )}
+          </p>
+
+          <p>
+            <strong>Description:</strong>
+            ${escapeHTML(worker.description || "No description")}
+          </p>
+
+          <div class="admin-actions">
+
+            <button
+              class="admin-btn success"
+              data-worker-approve="${escapeHTML(worker.id)}"
+            >
+              ✅ Approve Worker
+            </button>
+
+            <button
+              class="admin-btn danger"
+              data-worker-reject="${escapeHTML(worker.id)}"
+            >
+              ❌ Reject Worker
+            </button>
+
+          </div>
+
+        </article>
+      `).join("");
+    }
+
+
+    /*
+     * Confirm completion
+     *
+     * Booking: completion_requested -> completed
+     * Worker: completedTasks + 1, availability -> available
+     */
+
+    async function confirmCompletion(bookingId) {
+
+      if (busyIds.has(bookingId)) {
+        return;
+      }
+
+      const booking = bookings.find(b => b.id === bookingId);
+
+      if (!booking) {
+        alert("Booking not found.");
+        return;
+      }
+
+      if (booking.status !== "completion_requested") {
+        alert("Ye booking ab completion request state mein nahi hai.");
+        return;
+      }
+
+      const confirm = window.confirm(
+        "Kya aapne worker ka completed work verify kar liya hai?"
+      );
+
+      if (!confirm) {
+        return;
+      }
+
+      busyIds.add(bookingId);
+
+      try {
+
+        const bookingRef = F.doc(db, "bookings", bookingId);
+
+        /* Worker profile is the same UID used in workerProfiles document. */
+        const workerRef = F.doc(db, "workerProfiles", booking.workerUid);
+
+        /* Batch makes both updates together. */
+        const batch = F.writeBatch(db);
+
+        batch.update(bookingRef, {
+          status: "completed",
+          completedAt: F.serverTimestamp(),
+          completedByAdminUid: currentUser.uid
+        });
+
+        batch.update(workerRef, {
+          completedTasks: F.increment(1),
+          availability: "available",
+          lastActiveAt: F.serverTimestamp()
+        });
+
+        await batch.commit();
+
+        alert("✅ Work completed successfully.");
+
+      } catch (error) {
+
+        console.error("Completion error:", error);
+
+        alert(
+          error.code === "permission-denied"
+            ? "Permission denied. Firestore Rules check karein."
+            : "Completion update failed. Please try again."
+        );
+
+      } finally {
+
+        busyIds.delete(bookingId);
+
+      }
+    }
+
+
+    async function sendForReview(bookingId) {
+
+      if (busyIds.has(bookingId)) {
+        return;
+      }
+
+      const confirm = window.confirm(
+        "Is completion request ko review ke liye wapas bhejna hai?"
+      );
+
+      if (!confirm) {
+        return;
+      }
+
+      busyIds.add(bookingId);
+
+      try {
+
+        const bookingRef = F.doc(db, "bookings", bookingId);
+
+        await F.updateDoc(bookingRef, {
+          status: "working",
+          reviewedByAdminUid: currentUser.uid,
+          reviewRequestedAt: F.serverTimestamp()
+        });
+
+        alert("Booking worker ke review ke liye wapas bhej di gayi.");
+
+      } catch (error) {
+
+        console.error("Review error:", error);
+
+        alert(
+          error.code === "permission-denied"
+            ? "Permission denied. Firestore Rules check karein."
+            : "Review update failed."
+        );
+
+      } finally {
+
+        busyIds.delete(bookingId);
+
+      }
+    }
+
+
+    async function updateWorkerStatus(workerId, status) {
+
+      const message =
+        status === "approved"
+          ? "Is worker ko approve karna hai?"
+          : "Is worker application ko reject karna hai?";
+
+      if (!window.confirm(message)) {
+        return;
+      }
+
+      try {
+
+        const workerRef = F.doc(db, "workerProfiles", workerId);
+
+        await F.updateDoc(workerRef, { status });
+
+        alert(
+          status === "approved"
+            ? "✅ Worker approved."
+            : "Worker rejected."
+        );
+
+      } catch (error) {
+
+        console.error("Worker status error:", error);
+
+        alert(
+          error.code === "permission-denied"
+            ? "Permission denied. Firestore Rules check karein."
+            : "Worker status update nahi hua."
+        );
+
+      }
+    }
+
+
+    /* LIVE BOOKINGS */
+
+    function startBookingsListener() {
+
+      if (unsubBookings) {
+        unsubBookings();
+      }
+
+      const bookingsQuery = F.query(F.collection(db, "bookings"));
+
+      unsubBookings = F.onSnapshot(
+        bookingsQuery,
+
+        snapshot => {
+          bookings = snapshot.docs.map(docSnap => ({
+            id: docSnap.id,
+            ...docSnap.data()
+          }));
+
+          renderBookings();
+        },
+
+        error => {
+          console.error("Booking listener error:", error);
+
+          showMessage(
+            bookingsList,
+            "Bookings load nahi hui. Firestore Rules check karein."
+          );
+        }
+      );
+    }
+
+
+    /* LIVE WORKERS */
+
+    function startWorkersListener() {
+
+      if (unsubWorkers) {
+        unsubWorkers();
+      }
+
+      const workersQuery = F.query(F.collection(db, "workerProfiles"));
+
+      unsubWorkers = F.onSnapshot(
+        workersQuery,
+
+        snapshot => {
+          workers = snapshot.docs.map(docSnap => ({
+            id: docSnap.id,
+            ...docSnap.data()
+          }));
+
+          renderWorkers();
+          renderApplications();
+        },
+
+        error => {
+          console.error("Worker listener error:", error);
+
+          showMessage(
+            workersList,
+            "Workers load nahi hue. Firestore Rules check karein."
+          );
+        }
+      );
+    }
+
+
+    /* TABS */
+
+    document.querySelectorAll(".admin-tab").forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        document.querySelectorAll(".admin-tab").forEach(tab => {
+          tab.classList.toggle("active", tab === button);
+        });
+
+        document.querySelectorAll(".admin-section").forEach(section => {
+          section.classList.toggle(
+            "active",
+            section.id === `${button.dataset.tab}Section`
+          );
+        });
+
+      });
+
+    });
+
+
+    /* BOOKING + WORKER ACTIONS */
+
+    document.addEventListener("click", event => {
+
+      const completeButton = event.target.closest("[data-complete]");
+
+      if (completeButton) {
+        confirmCompletion(completeButton.dataset.complete);
+        return;
+      }
+
+      const reviewButton = event.target.closest("[data-review]");
+
+      if (reviewButton) {
+        sendForReview(reviewButton.dataset.review);
+        return;
+      }
+
+      const approveButton = event.target.closest("[data-worker-approve]");
+
+      if (approveButton) {
+        updateWorkerStatus(approveButton.dataset.workerApprove, "approved");
+        return;
+      }
+
+      const rejectButton = event.target.closest("[data-worker-reject]");
+
+      if (rejectButton) {
+        updateWorkerStatus(rejectButton.dataset.workerReject, "rejected");
+      }
+
+    });
+
+
+    /* AUTH + ADMIN CHECK */
+
+    A.onAuthStateChanged(A.getAuth(), async user => {
+
+      if (!user) {
+        window.location.href = "./login.html";
+        return;
+      }
+
+      try {
+
+        currentUser = user;
+
+        const role = await getRole(user);
+
+        if (role !== "admin") {
+          alert("Admin access required.");
+          window.location.href = "./index.html";
+          return;
+        }
+
+        if (typeof renderChrome === "function") {
+          renderChrome(user, role);
+        }
+
+        startBookingsListener();
+        startWorkersListener();
+
+      } catch (error) {
+
+        console.error("Admin initialization error:", error);
+
+        showMessage(
+          bookingsList,
+          "Admin dashboard initialize nahi ho paya."
+        );
+
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>

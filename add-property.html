@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Add Property — Kota Room Finder</title>
+
+  <meta
+    name="description"
+    content="List your room, PG or property for students in Kota."
+  >
+
+  <link rel="stylesheet" href="./styles.css">
+
+  <style>
+
+    body { background: #f8fafc; }
+
+    .property-page {
+      width: min(760px, 94%);
+      margin: 30px auto 60px;
+    }
+
+    .property-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 15px 40px rgba(15,23,42,.07);
+    }
+
+    .property-header { margin-bottom: 25px; }
+
+    .property-icon {
+      width: 55px;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #dbeafe;
+      border-radius: 15px;
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+
+    .property-header h1 { margin: 0 0 7px; color: #0f172a; }
+    .property-header p { margin: 0; color: #64748b; line-height: 1.55; }
+
+    .section-title {
+      margin: 28px 0 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #0f172a;
+      font-size: 18px;
+    }
+
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: #334155;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 11px;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+      outline: none;
+    }
+
+    .field textarea { resize: vertical; min-height: 110px; }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .choice { position: relative; }
+
+    .choice input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .choice label {
+      display: block;
+      padding: 12px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      color: #475569;
+      background: white;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .choice input:checked + label {
+      border-color: #2563eb;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .facility-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+    }
+
+    .facility {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: #f8fafc;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .facility input { width: auto; }
+
+    .location-box {
+      padding: 16px;
+      border: 1px solid #bfdbfe;
+      border-radius: 14px;
+      background: #eff6ff;
+    }
+
+    .location-title { font-weight: 900; color: #1e3a8a; margin-bottom: 6px; }
+
+    .location-help {
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 0 0 12px;
+    }
+
+    .location-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px;
+      background: #2563eb;
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .location-btn:disabled { opacity: .65; }
+
+    .location-status { margin-top: 10px; font-size: 13px; color: #64748b; }
+    .location-status.success { color: #15803d; font-weight: 700; }
+    .location-status.error { color: #dc2626; font-weight: 700; }
+
+    .coords {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      background: #dcfce7;
+      border-radius: 10px;
+      color: #166534;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .coords.show { display: block; }
+
+    .upload-box {
+      padding: 15px;
+      border: 1px dashed #94a3b8;
+      border-radius: 13px;
+      background: #f8fafc;
+    }
+
+    .upload-help { color: #64748b; font-size: 12px; line-height: 1.5; margin: 7px 0 12px; }
+
+    .upload-box input[type="file"] { width: 100%; box-sizing: border-box; }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .preview { height: 85px; border-radius: 9px; overflow: hidden; background: #e2e8f0; }
+    .preview img { width: 100%; height: 100%; object-fit: cover; }
+
+    .price-note { margin-top: 6px; color: #64748b; font-size: 11px; }
+
+    .warning-box {
+      margin-top: 20px;
+      padding: 13px;
+      border-radius: 11px;
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .error {
+      min-height: 20px;
+      color: #dc2626;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 12px 0;
+    }
+
+    .success {
+      display: none;
+      padding: 14px;
+      border-radius: 11px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 11px;
+      padding: 14px;
+      background: #2563eb;
+      color: white;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .submit-btn:disabled { opacity: .65; cursor: not-allowed; }
+
+    @media (max-width: 650px) {
+      .property-card { padding: 18px; }
+      .two-col { grid-template-columns: 1fr; }
+      .choice-grid { grid-template-columns: 1fr 1fr; }
+      .facility-grid { grid-template-columns: 1fr 1fr; }
+      .preview-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <main class="property-page">
+
+    <section class="property-card">
+
+      <div class="property-header">
+
+        <div class="property-icon">🏠</div>
+
+        <h1>Add Your Property</h1>
+
+        <p>
+          Apna room, PG ya flat Kota ke students
+          ke liye list karein.
+        </p>
+
+      </div>
+
+
+      <form id="propertyForm" novalidate>
+
+        <!-- =================================================
+             BASIC DETAILS
+             ================================================= -->
+
+        <h2 class="section-title">1. Property Details</h2>
+
+        <div class="field">
+
+          <label for="title">Property / Room Title *</label>
+
+          <input
+            id="title"
+            type="text"
+            maxlength="100"
+            placeholder="Example: Fully Furnished Single Room"
+            required
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>Room / Property Type *</label>
+
+          <div class="choice-grid">
+
+            <div class="choice">
+              <input id="typeSingle" type="radio" name="propertyType" value="single" required>
+              <label for="typeSingle">Single Room</label>
+            </div>
+
+            <div class="choice">
+              <input id="typeDouble" type="radio" name="propertyType" value="double">
+              <label for="typeDouble">Double Sharing</label>
+            </div>
+
+            <div class="choice">
+              <input id="typeTriple" type="radio" name="propertyType" value="triple">
+              <label for="typeTriple">Triple Sharing</label>
+            </div>
+
+            <div class="choice">
+              <input id="type1bhk" type="radio" name="propertyType" value="1bhk">
+              <label for="type1bhk">1BHK</label>
+            </div>
+
+            <div class="choice">
+              <input id="type2bhk" type="radio" name="propertyType" value="2bhk">
+              <label for="type2bhk">2BHK</label>
+            </div>
+
+            <div class="choice">
+              <input id="typePG" type="radio" name="propertyType" value="pg">
+              <label for="typePG">PG</label>
+            </div>
+
+            <div class="choice">
+              <input id="typeHostel" type="radio" name="propertyType" value="hostel">
+              <label for="typeHostel">Hostel</label>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SUITABLE FOR
+             ================================================= -->
+
+        <div class="field">
+
+          <label>Suitable For *</label>
+
+          <div class="choice-grid">
+
+            <div class="choice">
+              <input id="forBoys" type="radio" name="suitableFor" value="boys" required>
+              <label for="forBoys">👦 Boys</label>
+            </div>
+
+            <div class="choice">
+              <input id="forGirls" type="radio" name="suitableFor" value="girls">
+              <label for="forGirls">👧 Girls</label>
+            </div>
+
+            <div class="choice">
+              <input id="forFamily" type="radio" name="suitableFor" value="family">
+              <label for="forFamily">👨‍👩‍👧 Family</label>
+            </div>
+
+            <div class="choice">
+              <input id="forAnyone" type="radio" name="suitableFor" value="anyone">
+              <label for="forAnyone">👥 Anyone</label>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             RENT
+             ================================================= -->
+
+        <h2 class="section-title">2. Rent & Availability</h2>
+
+        <div class="two-col">
+
+          <div class="field">
+
+            <label for="monthlyRent">Monthly Rent (₹) *</label>
+
+            <input
+              id="monthlyRent"
+              type="number"
+              min="1"
+              max="1000000"
+              inputmode="numeric"
+              placeholder="7500"
+              required
+            >
+
+            <div class="price-note">💰 Rent aap khud set karenge.</div>
+
+          </div>
+
+          <div class="field">
+
+            <label for="deposit">Security Deposit (₹)</label>
+
+            <input
+              id="deposit"
+              type="number"
+              min="0"
+              max="1000000"
+              inputmode="numeric"
+              placeholder="10000"
+              value="0"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="two-col">
+
+          <div class="field">
+
+            <label for="availableFrom">Available From *</label>
+
+            <input id="availableFrom" type="date" required>
+
+          </div>
+
+          <div class="field">
+
+            <label for="furnishing">Furnishing *</label>
+
+            <select id="furnishing" required>
+              <option value="">Select</option>
+              <option value="fully_furnished">Fully Furnished</option>
+              <option value="semi_furnished">Semi Furnished</option>
+              <option value="unfurnished">Unfurnished</option>
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             LOCATION
+             ================================================= -->
+
+        <h2 class="section-title">3. Property Location</h2>
+
+        <div class="two-col">
+
+          <div class="field">
+            <label for="state">State</label>
+            <input id="state" value="Rajasthan" readonly>
+          </div>
+
+          <div class="field">
+            <label for="city">City</label>
+            <input id="city" value="Kota" readonly>
+          </div>
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="area">Area / Colony *</label>
+
+          <input
+            id="area"
+            type="text"
+            maxlength="80"
+            placeholder="Talwandi, Kunhadi, Vigyan Nagar..."
+            required
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="landmark">Nearby Landmark</label>
+
+          <input
+            id="landmark"
+            type="text"
+            maxlength="120"
+            placeholder="Near Allen, Landmark City..."
+          >
+
+        </div>
+
+
+        <!-- GPS -->
+
+        <div class="location-box">
+
+          <div class="location-title">📍 Exact Property Location</div>
+
+          <p class="location-help">
+            Property ki location set karne ke liye
+            "Use Property Location" button dabayein.
+          </p>
+
+          <button type="button" class="location-btn" id="locationBtn">
+            📍 Use Property Location
+          </button>
+
+          <div id="locationStatus" class="location-status">
+            Location abhi set nahi hui.
+          </div>
+
+          <div id="coordsBox" class="coords">
+
+            <strong>✓ Location saved</strong>
+
+            <br>
+
+            Latitude: <span id="latitudeText">-</span>
+
+            <br>
+
+            Longitude: <span id="longitudeText">-</span>
+
+            <br>
+
+            Accuracy: <span id="accuracyText">-</span>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FACILITIES
+             ================================================= -->
+
+        <h2 class="section-title">4. Facilities</h2>
+
+        <div class="facility-grid" id="facilityGrid">
+
+          <label class="facility"><input type="checkbox" value="Wi-Fi"> Wi-Fi</label>
+          <label class="facility"><input type="checkbox" value="AC"> AC</label>
+          <label class="facility"><input type="checkbox" value="Cooler"> Cooler</label>
+          <label class="facility"><input type="checkbox" value="Attached Bathroom"> Attached Bathroom</label>
+          <label class="facility"><input type="checkbox" value="Kitchen"> Kitchen</label>
+          <label class="facility"><input type="checkbox" value="Washing Machine"> Washing Machine</label>
+          <label class="facility"><input type="checkbox" value="Parking"> Parking</label>
+          <label class="facility"><input type="checkbox" value="RO Water"> RO Water</label>
+          <label class="facility"><input type="checkbox" value="Electricity"> Electricity</label>
+          <label class="facility"><input type="checkbox" value="CCTV"> CCTV</label>
+          <label class="facility"><input type="checkbox" value="Power Backup"> Power Backup</label>
+          <label class="facility"><input type="checkbox" value="Food/Tiffin"> Food/Tiffin</label>
+          <label class="facility"><input type="checkbox" value="Study Table"> Study Table</label>
+          <label class="facility"><input type="checkbox" value="Bed"> Bed</label>
+          <label class="facility"><input type="checkbox" value="Wardrobe"> Wardrobe</label>
+
+        </div>
+
+
+        <!-- =================================================
+             DESCRIPTION
+             ================================================= -->
+
+        <h2 class="section-title">5. Description</h2>
+
+        <div class="field">
+
+          <label for="description">Property ke baare mein *</label>
+
+          <textarea
+            id="description"
+            maxlength="1500"
+            placeholder="Room ki condition, nearby coaching, floor, rules etc. ke baare mein batayein..."
+            required
+          ></textarea>
+
+        </div>
+
+
+        <!-- =================================================
+             PHOTOS
+             ================================================= -->
+
+        <h2 class="section-title">6. Property Photos</h2>
+
+        <div class="upload-box">
+
+          <strong>📸 Room / Property Photos</strong>
+
+          <p class="upload-help">
+            Maximum 5 photos.
+            Har photo maximum 5 MB.
+            JPG, PNG ya WEBP use karein.
+          </p>
+
+          <input id="photos" type="file" accept="image/*" multiple>
+
+          <div class="preview-grid" id="previewGrid"></div>
+
+          <!-- NOTE: the lines from here to the end of the file were written
+               by me, because your pasted file ended at the preview grid. -->
+          <p class="upload-help">
+            Photos abhi sirf preview ke liye hain. Photo upload jald hi chalu hoga.
+          </p>
+
+        </div>
+
+
+        <div class="warning-box">
+          ⚠️ Aapki property listing Admin ki approval ke baad students ko dikhegi.
+          Sahi aur sachchi jaankari hi bharein.
+        </div>
+
+
+        <p class="error" id="error" role="alert"></p>
+
+        <div class="success" id="success" role="status"></div>
+
+        <button class="submit-btn" id="submitBtn" type="submit">
+          Submit Property
+        </button>
+
+      </form>
+
+    </section>
+
+  </main>
+
+
+  <script type="module">
+
+    /* =====================================================
+       SCRIPT WRITTEN BY ME (your pasted file had no script).
+       Check these before using:
+       - PROPERTIES_COLLECTION: Firestore collection name.
+       - Photos are NOT uploaded (kota-app.js has no Storage).
+       - Your Firestore rules must allow owners to create here.
+       ===================================================== */
+
+    import {
+      db,
+      F,
+      guard,
+      renderChrome,
+      toast
+    } from "./app.js";
+
+    const PROPERTIES_COLLECTION = "properties"; // <-- change if different
+
+    const form = document.getElementById("propertyForm");
+    const errorBox = document.getElementById("error");
+    const successBox = document.getElementById("success");
+    const submitBtn = document.getElementById("submitBtn");
+    const locationBtn = document.getElementById("locationBtn");
+    const locationStatus = document.getElementById("locationStatus");
+    const coordsBox = document.getElementById("coordsBox");
+    const latitudeText = document.getElementById("latitudeText");
+    const longitudeText = document.getElementById("longitudeText");
+    const accuracyText = document.getElementById("accuracyText");
+    const photosInput = document.getElementById("photos");
+    const previewGrid = document.getElementById("previewGrid");
+
+    let currentUser = null;
+    let propertyLatitude = null;
+    let propertyLongitude = null;
+    let propertyAccuracy = null;
+
+    // Only owners can open this page.
+    (async () => {
+      const result = await guard(["owner"]);
+      if (!result) return;
+
+      currentUser = result.user;
+      renderChrome(result.user, result.role);
+    })();
+
+    // Earliest "available from" date = today.
+    document.getElementById("availableFrom").min =
+      new Date().toISOString().split("T")[0];
+
+
+    // ---------- GPS ----------
+
+    locationBtn.addEventListener("click", () => {
+
+      errorBox.textContent = "";
+
+      if (!navigator.geolocation) {
+        locationStatus.textContent = "Your browser does not support location.";
+        locationStatus.className = "location-status error";
+        return;
+      }
+
+      locationBtn.disabled = true;
+      locationBtn.textContent = "📍 Getting Location...";
+      locationStatus.textContent = "Please allow location permission.";
+      locationStatus.className = "location-status";
+
+      navigator.geolocation.getCurrentPosition(
+        position => {
+
+          propertyLatitude = Number(position.coords.latitude.toFixed(7));
+          propertyLongitude = Number(position.coords.longitude.toFixed(7));
+          propertyAccuracy = Math.round(position.coords.accuracy);
+
+          latitudeText.textContent = propertyLatitude;
+          longitudeText.textContent = propertyLongitude;
+          accuracyText.textContent = propertyAccuracy + " meters";
+
+          coordsBox.classList.add("show");
+
+          locationStatus.textContent = "✓ Location successfully set.";
+          locationStatus.className = "location-status success";
+
+          locationBtn.disabled = false;
+          locationBtn.textContent = "📍 Location Updated";
+
+        },
+
+        error => {
+
+          const messages = {
+            1: "Location permission denied. Browser settings se allow karein.",
+            2: "Location unavailable. Please try again.",
+            3: "Location request timed out. Please try again."
+          };
+
+          locationStatus.textContent =
+            messages[error.code] || "Could not get your location.";
+          locationStatus.className = "location-status error";
+
+          locationBtn.disabled = false;
+          locationBtn.textContent = "📍 Try Again";
+
+        },
+
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+
+    });
+
+
+    // ---------- Photo previews (max 5, 5 MB each) ----------
+
+    let previewUrls = [];
+
+    photosInput.addEventListener("change", () => {
+
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
+      previewUrls = [];
+      previewGrid.innerHTML = "";
+      errorBox.textContent = "";
+
+      const files = [...photosInput.files];
+
+      if (files.length > 5) {
+        errorBox.textContent = "Maximum 5 photos select karein.";
+        photosInput.value = "";
+        return;
+      }
+
+      for (const file of files) {
+
+        if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+          errorBox.textContent = "Sirf JPG, PNG ya WEBP photos allowed hain.";
+          photosInput.value = "";
+          previewGrid.innerHTML = "";
+          return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+          errorBox.textContent = "Har photo maximum 5 MB honi chahiye.";
+          photosInput.value = "";
+          previewGrid.innerHTML = "";
+          return;
+        }
+
+        const url = URL.createObjectURL(file);
+        previewUrls.push(url);
+
+        const box = document.createElement("div");
+        box.className = "preview";
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Property photo preview";
+
+        box.appendChild(img);
+        previewGrid.appendChild(box);
+
+      }
+
+    });
+
+
+    // ---------- Submit ----------
+
+    form.addEventListener("submit", async event => {
+
+      event.preventDefault();
+
+      errorBox.textContent = "";
+      successBox.style.display = "none";
+
+      if (!currentUser) {
+        errorBox.textContent = "Please login karke dobara try karein.";
+        return;
+      }
+
+      const value = id => document.getElementById(id).value.trim();
+      const radio = name =>
+        form.querySelector(`input[name="${name}"]:checked`)?.value || "";
+
+      const title = value("title");
+      const propertyType = radio("propertyType");
+      const suitableFor = radio("suitableFor");
+      const monthlyRent = Number(value("monthlyRent"));
+      const deposit = Number(value("deposit") || 0);
+      const availableFrom = value("availableFrom");
+      const furnishing = value("furnishing");
+      const area = value("area");
+      const landmark = value("landmark");
+      const description = value("description");
+
+      const facilities = [
+        ...document.querySelectorAll("#facilityGrid input:checked")
+      ].map(input => input.value);
+
+      if (title.length < 5) {
+        errorBox.textContent = "Property title kam se kam 5 characters ka likhein.";
+        return;
+      }
+
+      if (!propertyType) {
+        errorBox.textContent = "Room / property type select karein.";
+        return;
+      }
+
+      if (!suitableFor) {
+        errorBox.textContent = "Suitable for select karein.";
+        return;
+      }
+
+      if (!Number.isFinite(monthlyRent) || monthlyRent < 1 || monthlyRent > 1000000) {
+        errorBox.textContent = "Sahi monthly rent likhein.";
+        return;
+      }
+
+      if (!Number.isFinite(deposit) || deposit < 0 || deposit > 1000000) {
+        errorBox.textContent = "Sahi security deposit likhein.";
+        return;
+      }
+
+      if (!availableFrom) {
+        errorBox.textContent = "Available from date select karein.";
+        return;
+      }
+
+      if (!furnishing) {
+        errorBox.textContent = "Furnishing select karein.";
+        return;
+      }
+
+      if (!area) {
+        errorBox.textContent = "Area / Colony likhein.";
+        return;
+      }
+
+      if (propertyLatitude === null || propertyLongitude === null) {
+        errorBox.textContent =
+          "Pehle 'Use Property Location' dabakar location set karein.";
+        return;
+      }
+
+      if (description.length < 20) {
+        errorBox.textContent = "Description kam se kam 20 characters ki likhein.";
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+
+        await F.addDoc(
+          F.collection(db, PROPERTIES_COLLECTION),
+          {
+            ownerUid: currentUser.uid,
+            ownerEmail: currentUser.email || "",
+
+            title,
+            propertyType,
+            suitableFor,
+
+            monthlyRent,
+            deposit,
+            availableFrom,
+            furnishing,
+
+            state: "Rajasthan",
+            city: "Kota",
+            area,
+            landmark,
+
+            latitude: propertyLatitude,
+            longitude: propertyLongitude,
+            locationAccuracy: propertyAccuracy,
+
+            facilities,
+            description,
+
+            status: "pending",
+            createdAt: F.serverTimestamp()
+          }
+        );
+
+        form.reset();
+
+        propertyLatitude = null;
+        propertyLongitude = null;
+        propertyAccuracy = null;
+
+        previewGrid.innerHTML = "";
+        coordsBox.classList.remove("show");
+        locationStatus.textContent = "Location abhi set nahi hui.";
+        locationStatus.className = "location-status";
+        locationBtn.textContent = "📍 Use Property Location";
+
+        document.getElementById("state").value = "Rajasthan";
+        document.getElementById("city").value = "Kota";
+
+        successBox.textContent =
+          "✅ Property submit ho gayi. Admin approval ke baad ye students ko dikhegi.";
+        successBox.style.display = "block";
+
+        toast("Property submitted.", "success");
+
+      } catch (error) {
+
+        console.error("Property submit error:", error);
+
+        errorBox.textContent =
+          error.code === "permission-denied"
+            ? "Permission denied. Firestore rules check karein."
+            : "Property submit nahi ho saki. Dobara try karein.";
+
+      } finally {
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Property";
+
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>

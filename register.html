@@ -1,245 +1,973 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
+
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Create Account — HunarSetu</title>
-  <link rel="stylesheet" href="styles.css">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
+
+  <title>Create Account — Kota Room Finder</title>
+
+  <meta
+    name="description"
+    content="Create your Kota Room Finder account as a Student or House Owner."
+  >
+
+  <link rel="stylesheet" href="./styles.css">
+
+  <style>
+
+    body {
+      background: #f8fafc;
+    }
+
+    .register-page {
+      width: min(500px, 92%);
+      margin: 35px auto 60px;
+    }
+
+    .register-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 15px 40px rgba(15,23,42,.08);
+    }
+
+    .register-icon {
+      width: 55px;
+      height: 55px;
+      border-radius: 15px;
+      background: #dbeafe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
+
+    .register-card h1 {
+      margin: 0 0 7px;
+      color: #0f172a;
+    }
+
+    .register-subtitle {
+      color: #64748b;
+      margin: 0 0 25px;
+      line-height: 1.5;
+    }
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 800;
+      font-size: 14px;
+      color: #334155;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 11px;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+    }
+
+    .role-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .role-option {
+      position: relative;
+    }
+
+    .role-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .role-label {
+      display: block;
+      padding: 16px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 13px;
+      cursor: pointer;
+      text-align: center;
+      transition: .2s;
+      background: #ffffff;
+    }
+
+    .role-label:hover {
+      border-color: #93c5fd;
+    }
+
+    .role-option input:checked + .role-label {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+
+    .role-emoji {
+      display: block;
+      font-size: 27px;
+      margin-bottom: 6px;
+    }
+
+    .role-title {
+      display: block;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .role-description {
+      display: block;
+      margin-top: 4px;
+      color: #64748b;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .err {
+      min-height: 20px;
+      color: #dc2626;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 8px 0;
+    }
+
+    .success {
+      display: none;
+      padding: 12px;
+      border-radius: 11px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .register-button {
+      width: 100%;
+      border: 0;
+      border-radius: 11px;
+      padding: 14px;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .register-button:hover {
+      background: #1d4ed8;
+    }
+
+    .register-button:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+    }
+
+    .login-text {
+      text-align: center;
+      margin: 20px 0 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .login-text a {
+      color: #2563eb;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .info-box {
+      margin-top: 18px;
+      padding: 13px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 450px) {
+
+      .register-card {
+        padding: 20px;
+      }
+
+      .role-box {
+        grid-template-columns: 1fr;
+      }
+
+    }
+
+  </style>
+
 </head>
+
 
 <body>
 
-  <main class="wrap">
-    <form class="auth card" id="f" novalidate>
 
-      <h1>Create account</h1>
-      <p>Create your HunarSetu account</p>
+  <main class="register-page">
 
-      <label for="name">Full name</label>
-      <input
-        id="name"
-        type="text"
-        autocomplete="name"
-        minlength="2"
-        required
-      >
+    <form
+      class="register-card"
+      id="registerForm"
+      novalidate
+    >
 
-      <label for="role">I am a</label>
-      <select id="role" required>
-        <option value="customer">Customer</option>
-        <option value="worker">Service professional</option>
-      </select>
 
-      <label for="email">Email</label>
-      <input
-        id="email"
-        type="email"
-        autocomplete="email"
-        required
-      >
+      <div class="register-icon">
+        🏠
+      </div>
 
-      <label for="pw">Password (minimum 8 characters)</label>
-      <input
-        id="pw"
-        type="password"
-        autocomplete="new-password"
-        minlength="8"
-        required
-      >
 
-      <p class="err" id="err" role="alert"></p>
+      <h1>
+        Create your account
+      </h1>
 
-      <button class="btn" id="go" type="submit">
-        Create account
-      </button>
 
-      <p>
-        Already registered?
-        <a href="login.html">Login</a>
+      <p class="register-subtitle">
+        Kota me room dhoondhne ya apni property list
+        karne ke liye account banayein.
       </p>
 
+
+      <!-- NAME -->
+
+      <div class="field">
+
+        <label for="name">
+          Full Name
+        </label>
+
+        <input
+          id="name"
+          type="text"
+          autocomplete="name"
+          minlength="2"
+          placeholder="Apna naam"
+          required
+        >
+
+      </div>
+
+
+      <!-- ROLE -->
+
+      <div class="field">
+
+        <label>
+          Aap kya karna chahte hain?
+        </label>
+
+
+        <div class="role-box">
+
+
+          <!-- STUDENT -->
+
+          <div class="role-option">
+
+            <input
+              id="roleStudent"
+              type="radio"
+              name="accountRole"
+              value="customer"
+              checked
+            >
+
+            <label
+              class="role-label"
+              for="roleStudent"
+            >
+
+              <span class="role-emoji">
+                🎓
+              </span>
+
+              <span class="role-title">
+                Student
+              </span>
+
+              <span class="role-description">
+                Room / PG / flat dhoondhna
+              </span>
+
+            </label>
+
+          </div>
+
+
+          <!-- OWNER -->
+
+          <div class="role-option">
+
+            <input
+              id="roleOwner"
+              type="radio"
+              name="accountRole"
+              value="worker"
+            >
+
+            <label
+              class="role-label"
+              for="roleOwner"
+            >
+
+              <span class="role-emoji">
+                🏠
+              </span>
+
+              <span class="role-title">
+                House Owner
+              </span>
+
+              <span class="role-description">
+                Apni property list karna
+              </span>
+
+            </label>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- EMAIL -->
+
+      <div class="field">
+
+        <label for="email">
+          Email
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          autocomplete="email"
+          placeholder="example@gmail.com"
+          required
+        >
+
+      </div>
+
+
+      <!-- PASSWORD -->
+
+      <div class="field">
+
+        <label for="password">
+          Password
+        </label>
+
+        <input
+          id="password"
+          type="password"
+          autocomplete="new-password"
+          minlength="8"
+          placeholder="Minimum 8 characters"
+          required
+        >
+
+      </div>
+
+
+      <!-- ERROR -->
+
+      <p
+        class="err"
+        id="errorBox"
+        role="alert"
+      ></p>
+
+
+      <!-- SUCCESS -->
+
+      <div
+        class="success"
+        id="successBox"
+      ></div>
+
+
+      <!-- SUBMIT -->
+
+      <button
+        class="register-button"
+        id="submitButton"
+        type="submit"
+      >
+        Create Account
+      </button>
+
+
+      <p class="login-text">
+
+        Already have an account?
+
+        <a href="./login.html">
+          Login
+        </a>
+
+      </p>
+
+
+      <div class="info-box">
+
+        🔐 Aapka account Firebase Authentication se
+        securely create hoga.
+
+        <br><br>
+
+        📧 Registration ke baad email verification
+        bheji jayegi.
+
+      </div>
+
+
     </form>
+
   </main>
 
+
   <script type="module">
+
+
+    // ========================================================
+    // IMPORT APP
+    // ========================================================
+
     import {
-      renderChrome,
       auth,
       db,
       A,
       F,
-      home
+      home,
+      renderChrome
     } from "./app.js";
 
-    renderChrome();
 
-    const form = document.getElementById("f");
-    const errorBox = document.getElementById("err");
-    const submitBtn = document.getElementById("go");
+    // Direct Firebase Auth functions.
+    // Ye app.js ke exports par depend nahi karte.
 
-    // Show readable Firebase errors
-    function getErrorMessage(error) {
-      const messages = {
-        "auth/email-already-in-use":
-          "This email is already registered. Please log in.",
+    import {
+      createUserWithEmailAndPassword,
+      sendEmailVerification
+    } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        "auth/invalid-email":
-          "Please enter a valid email address.",
 
-        "auth/weak-password":
-          "Password must be at least 8 characters.",
+    // ========================================================
+    // ELEMENTS
+    // ========================================================
 
-        "auth/network-request-failed":
-          "Network error. Please check your internet connection.",
+    const form =
+      document.getElementById(
+        "registerForm"
+      );
 
-        "auth/operation-not-allowed":
-          "Email/password registration is disabled in Firebase.",
 
-        "permission-denied":
-          "Database permission denied. Please check Firestore rules."
-      };
+    const nameInput =
+      document.getElementById(
+        "name"
+      );
 
-      return messages[error.code] ||
-        "Something went wrong. Please try again.";
-    }
 
-    // Respect worker role when redirected from a worker signup link
-    const params = new URLSearchParams(location.search);
+    const emailInput =
+      document.getElementById(
+        "email"
+      );
 
-    const next = params.get("next");
 
-function getSafeNext() {
+    const passwordInput =
+      document.getElementById(
+        "password"
+      );
 
-  if (!next) {
-    return null;
-  }
 
-  try {
+    const roleStudent =
+      document.getElementById(
+        "roleStudent"
+      );
 
-    const url =
-      new URL(next, window.location.origin);
 
-    if (url.origin !== window.location.origin) {
-      return null;
-    }
+    const roleOwner =
+      document.getElementById(
+        "roleOwner"
+      );
 
-    return url.pathname +
-      url.search +
-      url.hash;
 
-  } catch {
-    return null;
-  }
-}
-    if (params.get("role") === "worker") {
+    const errorBox =
+      document.getElementById(
+        "errorBox"
+      );
 
-  document.getElementById("role").value =
-    "worker";
 
-} else if (params.get("role") === "customer") {
+    const successBox =
+      document.getElementById(
+        "successBox"
+      );
 
-  document.getElementById("role").value =
-    "customer";
 
-  // Customer service booking flow me
-  // role selector ko change na karne dein.
-  document.getElementById("role").disabled =
-    true;
+    const submitButton =
+      document.getElementById(
+        "submitButton"
+      );
 
-    }
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
+    // ========================================================
+    // URL PARAMETERS
+    // ========================================================
 
-      errorBox.textContent = "";
+    const urlParams =
+      new URLSearchParams(
+        window.location.search
+      );
 
-      const name =
-        document.getElementById("name").value.trim();
 
-      const email =
-        document.getElementById("email").value.trim();
+    const requestedRole =
+      urlParams.get("role");
 
-      const password =
-        document.getElementById("pw").value;
 
-      const role =
-        document.getElementById("role").value;
+    const next =
+      urlParams.get("next");
 
-      // Basic validation
-      if (name.length < 2) {
-        errorBox.textContent =
-          "Please enter your full name.";
-        return;
+
+    // ========================================================
+    // SAFE NEXT URL
+    // ========================================================
+
+    function getSafeNext() {
+
+      if (!next) {
+        return null;
       }
 
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        errorBox.textContent =
-          "Please enter a valid email address.";
-        return;
-      }
-
-      if (password.length < 8) {
-        errorBox.textContent =
-          "Password must be at least 8 characters.";
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Creating account...";
 
       try {
-        // 1. Create Firebase Authentication account
-        const credential =
-          await A.createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
+
+        const url =
+          new URL(
+            next,
+            window.location.origin
           );
 
-        const user = credential.user;
 
-        // 2. Save basic user details in Firestore
-        await F.setDoc(
-          F.doc(db, "users", user.uid),
-          {
-            uid: user.uid,
-            name: name,
-            email: email,
-            role: role,
-            emailVerified: false,
-            createdAt: F.serverTimestamp()
-          }
+        if (
+          url.origin !==
+          window.location.origin
+        ) {
+
+          return null;
+
+        }
+
+
+        return (
+          url.pathname
+          +
+          url.search
+          +
+          url.hash
         );
 
-        // 3. Send email verification
-        await A.sendEmailVerification(user);
+      } catch {
 
-        // 4. Redirect
-const safeNext = getSafeNext();
+        return null;
 
-if (safeNext && role === "customer") {
-
-  location.href = safeNext;
-
-} else {
-
-  location.href = home(role);
-
-}
-} catch (error) {
-  console.error("Registration error:", error);
-
-  errorBox.textContent =
-    "Error: " +
-    (error.code || "unknown") +
-    " — " +
-    (error.message || "Please try again.");
-
-  submitBtn.disabled = false;
-  submitBtn.textContent = "Create account";
       }
-    });
+
+    }
+
+
+    // ========================================================
+    // PRESELECT ROLE
+    // ========================================================
+
+    if (
+      requestedRole === "worker"
+    ) {
+
+      roleOwner.checked = true;
+
+      roleStudent.checked = false;
+
+    }
+
+
+    if (
+      requestedRole === "customer"
+    ) {
+
+      roleStudent.checked = true;
+
+      roleOwner.checked = false;
+
+    }
+
+
+    // ========================================================
+    // FIREBASE ERROR MESSAGE
+    // ========================================================
+
+    function getErrorMessage(
+      error
+    ) {
+
+      const messages = {
+
+        "auth/email-already-in-use":
+          "Ye email pehle se registered hai. Login karein.",
+
+        "auth/invalid-email":
+          "Please valid email address enter karein.",
+
+        "auth/weak-password":
+          "Password kam se kam 8 characters ka hona chahiye.",
+
+        "auth/network-request-failed":
+          "Internet connection check karein.",
+
+        "auth/operation-not-allowed":
+          "Firebase me Email/Password registration enabled nahi hai.",
+
+        "permission-denied":
+          "Database permission denied. Firestore rules check karein.",
+
+        "auth/too-many-requests":
+          "Bahut zyada attempts ho gaye. Thodi der baad try karein."
+
+      };
+
+
+      return (
+        messages[error?.code]
+        ||
+        error?.message
+        ||
+        "Account create nahi ho paya. Please try again."
+      );
+
+    }
+
+
+    // ========================================================
+    // SUBMIT
+    // ========================================================
+
+    form.addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+
+        errorBox.textContent = "";
+
+        successBox.style.display =
+          "none";
+
+
+        // ----------------------------------------------------
+        // GET VALUES
+        // ----------------------------------------------------
+
+        const name =
+          nameInput.value.trim();
+
+
+        const email =
+          emailInput.value.trim();
+
+
+        const password =
+          passwordInput.value;
+
+
+        /*
+          IMPORTANT:
+
+          Firebase rules me existing project compatibility
+          ke liye:
+
+          customer = Student
+          worker   = House Owner
+
+          app.js in dono ko automatically naye role names
+          student / owner ke roop me read karega.
+        */
+
+        const role =
+          roleOwner.checked
+            ? "worker"
+            : "customer";
+
+
+        // ----------------------------------------------------
+        // VALIDATION
+        // ----------------------------------------------------
+
+        if (
+          name.length < 2
+        ) {
+
+          errorBox.textContent =
+            "Please apna full name enter karein.";
+
+          return;
+
+        }
+
+
+        if (
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            .test(email)
+        ) {
+
+          errorBox.textContent =
+            "Please valid email enter karein.";
+
+          return;
+
+        }
+
+
+        if (
+          password.length < 8
+        ) {
+
+          errorBox.textContent =
+            "Password kam se kam 8 characters ka hona chahiye.";
+
+          return;
+
+        }
+
+
+        // ----------------------------------------------------
+        // BUTTON
+        // ----------------------------------------------------
+
+        submitButton.disabled =
+          true;
+
+        submitButton.textContent =
+          "Creating account...";
+
+
+        try {
+
+
+          // ==================================================
+          // 1. CREATE AUTH ACCOUNT
+          // ==================================================
+
+          const credential =
+            await createUserWithEmailAndPassword(
+              auth,
+              email,
+              password
+            );
+
+
+          const user =
+            credential.user;
+
+
+          // ==================================================
+          // 2. SAVE USER IN FIRESTORE
+          // ==================================================
+
+          await F.setDoc(
+
+            F.doc(
+              db,
+              "users",
+              user.uid
+            ),
+
+            {
+
+              uid:
+                user.uid,
+
+              name:
+                name,
+
+              email:
+                email,
+
+              /*
+                Existing Firebase rules ke saath
+                compatibility:
+
+                customer = Student
+                worker   = House Owner
+              */
+
+              role:
+                role,
+
+              emailVerified:
+                false,
+
+              createdAt:
+                F.serverTimestamp()
+
+            }
+
+          );
+
+
+          // ==================================================
+          // 3. SEND VERIFICATION EMAIL
+          // ==================================================
+
+          try {
+
+            await sendEmailVerification(
+              user
+            );
+
+          } catch (verificationError) {
+
+            console.warn(
+              "Verification email failed:",
+              verificationError
+            );
+
+          }
+
+
+          // ==================================================
+          // 4. SUCCESS MESSAGE
+          // ==================================================
+
+          successBox.innerHTML = `
+
+            ✅ Account successfully create ho gaya.
+
+            <br><br>
+
+            📧 Aapke email par verification link bheja gaya hai.
+
+            <br><br>
+
+            Ab aapko ${
+              role === "worker"
+                ? "apni property/room ki details add karni hongi."
+                : "rooms search kar sakte hain."
+            }
+
+          `;
+
+
+          successBox.style.display =
+            "block";
+
+
+          // ==================================================
+          // 5. REDIRECT
+          // ==================================================
+
+          const safeNext =
+            getSafeNext();
+
+
+          setTimeout(
+            () => {
+
+              if (
+                safeNext
+              ) {
+
+                window.location.href =
+                  safeNext;
+
+                return;
+
+              }
+
+
+              if (
+                role === "worker"
+              ) {
+
+                // House Owner → Add Property
+
+                window.location.href =
+                  "./join.html";
+
+                return;
+
+              }
+
+
+              // Student → Home
+
+              window.location.href =
+                "./index.html";
+
+            },
+            1800
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "Registration error:",
+            error
+          );
+
+
+          errorBox.textContent =
+            getErrorMessage(
+              error
+            );
+
+
+          submitButton.disabled =
+            false;
+
+
+          submitButton.textContent =
+            "Create Account";
+
+        }
+
+      }
+    );
+
+
   </script>
 
 </body>
-</html>
+    </html>

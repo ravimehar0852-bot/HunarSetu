@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Admin Panel — Kota Room Finder</title>
+
+  <link rel="stylesheet" href="./styles.css">
+
+  <style>
+
+    body { background: #f8fafc; color: #0f172a; }
+
+    .admin-wrap { width: min(1150px, 94%); margin: 28px auto 60px; }
+
+    .admin-head { margin-bottom: 22px; }
+    .admin-head h1 { margin: 0 0 7px; font-size: clamp(26px, 5vw, 38px); }
+    .admin-head p { margin: 0; color: #64748b; line-height: 1.5; }
+
+    .live {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 12px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px;
+      margin: 20px 0;
+    }
+
+    .stat {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 15px;
+      padding: 17px;
+    }
+
+    .stat span {
+      display: block;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .stat strong { font-size: 28px; }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 9px; margin: 22px 0; }
+
+    .tab {
+      border: 1px solid #cbd5e1;
+      background: white;
+      color: #334155;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tab.active { background: #2563eb; border-color: #2563eb; color: white; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+    .section h2 { margin: 0 0 6px; }
+    .section-note { color: #64748b; font-size: 13px; margin-bottom: 16px; }
+
+    .listing-grid { display: grid; gap: 16px; }
+
+    .listing-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 17px;
+      padding: 17px;
+      box-shadow: 0 5px 18px rgba(15,23,42,.04);
+    }
+
+    .listing-top { display: flex; gap: 15px; align-items: flex-start; }
+
+    .listing-photo {
+      width: 150px;
+      height: 115px;
+      flex: 0 0 150px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #e2e8f0;
+    }
+
+    .listing-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+    .no-photo {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      color: #94a3b8;
+    }
+
+    .listing-info { flex: 1; min-width: 0; }
+    .listing-info h3 { margin: 0 0 7px; font-size: 19px; overflow-wrap: anywhere; }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      margin-bottom: 9px;
+    }
+
+    .pending { background: #fef3c7; color: #92400e; }
+    .approved { background: #dcfce7; color: #166534; }
+    .rejected { background: #fee2e2; color: #991b1b; }
+
+    .listing-info p {
+      margin: 5px 0;
+      color: #475569;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .listing-info strong { color: #0f172a; }
+    .rent { font-size: 20px; font-weight: 900; color: #15803d !important; }
+
+    .details { margin-top: 15px; padding: 14px; background: #f8fafc; border-radius: 12px; }
+    .details p { margin: 6px 0; color: #475569; line-height: 1.5; }
+
+    .facilities { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+
+    .facility {
+      background: #e0f2fe;
+      color: #075985;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .admin-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
+
+    .btn {
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 15px;
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-green { background: #15803d; }
+    .btn-red { background: #dc2626; }
+    .btn-blue { background: #2563eb; }
+    .btn-dark { background: #0f172a; }
+
+    .empty {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 13px;
+      padding: 20px;
+      color: #64748b;
+    }
+
+    .loading { background: white; border-radius: 13px; padding: 20px; color: #64748b; }
+
+    .admin-error {
+      padding: 14px;
+      border-radius: 11px;
+      background: #fee2e2;
+      color: #991b1b;
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    @media (max-width: 800px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .admin-wrap { width: 92%; margin-top: 20px; }
+      .listing-top { flex-direction: column; }
+      .listing-photo { width: 100%; height: 190px; flex-basis: auto; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .btn { flex: 1 1 130px; text-align: center; }
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <main class="admin-wrap">
+
+    <!-- HEADER -->
+
+    <header class="admin-head">
+
+      <h1>🏠 Admin Panel</h1>
+
+      <p>
+        Kota Room Finder — Properties, owners and approvals manage karein.
+      </p>
+
+      <div class="live">
+        <span class="dot"></span>
+        LIVE ADMIN PANEL
+      </div>
+
+    </header>
+
+
+    <!-- ERROR -->
+
+    <div class="admin-error" id="errorBox"></div>
+
+
+    <!-- STATS -->
+
+    <section class="stats">
+
+      <div class="stat">
+        <span>Total Properties</span>
+        <strong id="totalCount">0</strong>
+      </div>
+
+      <div class="stat">
+        <span>Pending Approval</span>
+        <strong id="pendingCount">0</strong>
+      </div>
+
+      <div class="stat">
+        <span>Approved</span>
+        <strong id="approvedCount">0</strong>
+      </div>
+
+      <div class="stat">
+        <span>Rejected</span>
+        <strong id="rejectedCount">0</strong>
+      </div>
+
+    </section>
+
+
+    <!-- TABS -->
+
+    <div class="tabs">
+      <button class="tab active" data-tab="pending">🕐 Pending</button>
+      <button class="tab" data-tab="approved">✅ Approved</button>
+      <button class="tab" data-tab="rejected">❌ Rejected</button>
+      <button class="tab" data-tab="all">📋 All Properties</button>
+    </div>
+
+
+    <!-- PENDING -->
+
+    <section class="section active" id="pendingSection">
+
+      <h2>Pending Property Approvals</h2>
+
+      <p class="section-note">
+        Owner ki submitted properties yahan verify karke approve ya reject karein.
+      </p>
+
+      <div class="listing-grid" id="pendingList">
+        <div class="loading">Properties loading...</div>
+      </div>
+
+    </section>
+
+
+    <!-- APPROVED -->
+
+    <section class="section" id="approvedSection">
+
+      <h2>Approved Properties</h2>
+
+      <p class="section-note">
+        Ye properties students ko website par dikh sakti hain.
+      </p>
+
+      <div class="listing-grid" id="approvedList"></div>
+
+    </section>
+
+
+    <!-- REJECTED -->
+
+    <section class="section" id="rejectedSection">
+
+      <h2>Rejected Properties</h2>
+
+      <p class="section-note">
+        Rejected listings yahan visible rahengi.
+      </p>
+
+      <div class="listing-grid" id="rejectedList"></div>
+
+    </section>
+
+
+    <!-- ALL -->
+
+    <section class="section" id="allSection">
+
+      <h2>All Properties</h2>
+
+      <p class="section-note">
+        Platform ki saari property listings.
+      </p>
+
+      <div class="listing-grid" id="allList"></div>
+
+    </section>
+
+  </main>
+
+
+  <script type="module">
+
+    // NOTE: "auth" was missing from this import list in your pasted file,
+    // but the code below uses it (A.onAuthStateChanged(auth, ...)).
+    // Without it the page throws "auth is not defined" and nothing loads.
+    import {
+      A,
+      F,
+      auth,
+      db,
+      renderChrome,
+      getRole
+    } from "./app.js";
+
+
+    // ========================================================
+    // ELEMENTS
+    // ========================================================
+
+    const totalCount = document.getElementById("totalCount");
+    const pendingCount = document.getElementById("pendingCount");
+    const approvedCount = document.getElementById("approvedCount");
+    const rejectedCount = document.getElementById("rejectedCount");
+
+    const pendingList = document.getElementById("pendingList");
+    const approvedList = document.getElementById("approvedList");
+    const rejectedList = document.getElementById("rejectedList");
+    const allList = document.getElementById("allList");
+
+    const errorBox = document.getElementById("errorBox");
+
+
+    // ========================================================
+    // DATA
+    // ========================================================
+
+    let listings = [];
+
+    let busyIds = new Set();
+
+
+    // ========================================================
+    // ESCAPE HTML
+    // ========================================================
+
+    function escapeHTML(value = "") {
+
+      return String(value).replace(
+        /[&<>"']/g,
+        char => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        })[char]
+      );
+
+    }
+
+
+    // ========================================================
+    // DATE
+    // ========================================================
+
+    function formatDate(value) {
+
+      if (!value) {
+        return "Not available";
+      }
+
+      try {
+
+        const date =
+          typeof value.toDate === "function"
+            ? value.toDate()
+            : new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+          return "Not available";
+        }
+
+        return date.toLocaleString("en-IN", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        });
+
+      } catch {
+
+        return "Not available";
+
+      }
+
+    }
+
+
+    // ========================================================
+    // STATUS BADGE
+    // ========================================================
+
+    function statusBadge(status) {
+
+      const label =
+        status === "approved"
+          ? "Approved"
+          : status === "rejected"
+            ? "Rejected"
+            : "Pending Approval";
+
+      return `
+        <span class="badge ${escapeHTML(status)}">
+          ${escapeHTML(label)}
+        </span>
+      `;
+
+    }
+
+
+    // ========================================================
+    // PROPERTY CARD
+    // ========================================================
+
+    function renderListing(listing) {
+
+      const id = listing.id;
+
+      const status = listing.status || "pending";
+
+      const photo =
+        Array.isArray(listing.photos) && listing.photos.length
+          ? listing.photos[0]
+          : "";
+
+      const facilities =
+        Array.isArray(listing.facilities)
+          ? listing.facilities
+          : [];
+
+      const location =
+        [
+          listing.area,
+          listing.city,
+          listing.state
+        ]
+          .filter(Boolean)
+          .join(", ");
+
+      const availableFrom =
+        listing.availableFrom || "Not specified";
+
+      const rent = Number(listing.monthlyRent) || 0;
+
+      const deposit = Number(listing.securityDeposit) || 0;
+
+      let actions = "";
+
+      // ======================================================
+      // ADMIN ACTIONS
+      // ======================================================
+
+      if (status === "pending") {
+
+        actions = `
+          <button
+            class="btn btn-green"
+            data-action="approve"
+            data-id="${escapeHTML(id)}"
+          >
+            ✅ Approve Property
+          </button>
+
+          <button
+            class="btn btn-red"
+            data-action="reject"
+            data-id="${escapeHTML(id)}"
+          >
+            ❌ Reject Property
+          </button>
+        `;
+
+      }
+
+      if (status === "rejected") {
+
+        actions = `
+          <button
+            class="btn btn-green"
+            data-action="approve"
+            data-id="${escapeHTML(id)}"
+          >
+            ✅ Approve Again
+          </button>
+        `;
+
+      }
+
+      return `
+
+        <article class="listing-card">
+
+          <div class="listing-top">
+
+            <div class="listing-photo">
+
+              ${
+                photo
+                  ? `
+                    <img
+                      src="${escapeHTML(photo)}"
+                      alt="Property photo"
+                      loading="lazy"
+                    >
+                  `
+                  : `
+                    <div class="no-photo">🏠</div>
+                  `
+              }
+
+            </div>
+
+            <div class="listing-info">
+
+              <h3>
+                ${escapeHTML(listing.title || "Untitled Property")}
+              </h3>
+
+              ${statusBadge(status)}
+
+              <p class="rent">
+                ₹${rent.toLocaleString("en-IN")}
+                / month
+              </p>
+
+              <p>
+                <strong>Type:</strong>
+                ${escapeHTML(
+                  listing.roomTypeLabel ||
+                  listing.propertyType ||
+                  "Not specified"
+                )}
+              </p>
+
+              <p>
+                <strong>Suitable for:</strong>
+                ${escapeHTML(
+                  listing.suitableForLabel ||
+                  listing.suitableFor ||
+                  "Not specified"
+                )}
+              </p>
+
+              <p>
+                <strong>Location:</strong>
+                ${escapeHTML(location || "Not provided")}
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="details">
+
+            <p>
+              <strong>💰 Security Deposit:</strong>
+              ₹${deposit.toLocaleString("en-IN")}
+            </p>
+
+            <p>
+              <strong>📅 Available From:</strong>
+              ${escapeHTML(availableFrom)}
+            </p>
+
+            <p>
+              <strong>🛋 Furnishing:</strong>
+              ${escapeHTML(listing.furnishing || "Not specified")}
+            </p>
+
+            ${
+              listing.landmark
+                ? `
+                  <p>
+                    <strong>📍 Landmark:</strong>
+                    ${escapeHTML(listing.landmark)}
+                  </p>
+                `
+                : ""
+            }
+
+            <p>
+              <strong>👤 Owner:</strong>
+              ${escapeHTML(listing.ownerName || "Not provided")}
+            </p>
+
+            <p>
+              <strong>📞 Owner Phone:</strong>
+              ${escapeHTML(listing.ownerPhone || "Not provided")}
+            </p>
+
+            <p>
+              <strong>📧 Owner Email:</strong>
+              ${escapeHTML(listing.ownerEmail || "Not provided")}
+            </p>
+
+            <p>
+              <strong>📝 Description:</strong>
+              ${escapeHTML(listing.description || "No description")}
+            </p>
+
+            ${
+              facilities.length
+                ? `
+                  <p>
+                    <strong>Facilities:</strong>
+                  </p>
+
+                  <div class="facilities">
+                    ${facilities
+                      .map(item => `
+                        <span class="facility">
+                          ${escapeHTML(item)}
+                        </span>
+                      `)
+                      .join("")}
+                  </div>
+                `
+                : ""
+            }
+
+            <p class="section-note">
+              Submitted:
+              ${escapeHTML(formatDate(listing.createdAt))}
+            </p>
+
+          </div>
+
+
+          <div class="admin-actions">
+
+            ${
+              listing.ownerPhone
+                ? `
+                  <a
+                    class="btn btn-blue"
+                    href="tel:${escapeHTML(listing.ownerPhone)}"
+                  >
+                    📞 Call Owner
+                  </a>
+                `
+                : ""
+            }
+
+            ${
+              status === "pending" || status === "rejected"
+                ? actions
+                : ""
+            }
+
+          </div>
+
+        </article>
+
+      `;
+
+    }
+
+
+    // ========================================================
+    // EMPTY MESSAGE
+    // ========================================================
+
+    function emptyMessage(message) {
+
+      return `
+        <div class="empty">
+          ${escapeHTML(message)}
+        </div>
+      `;
+
+    }
+
+
+    // ========================================================
+    // RENDER ALL
+    // ========================================================
+
+    function renderAll() {
+
+      const pending = listings.filter(item => item.status === "pending");
+
+      const approved = listings.filter(item => item.status === "approved");
+
+      const rejected = listings.filter(item => item.status === "rejected");
+
+      // Stats
+
+      totalCount.textContent = listings.length;
+      pendingCount.textContent = pending.length;
+      approvedCount.textContent = approved.length;
+      rejectedCount.textContent = rejected.length;
+
+      // Pending
+
+      pendingList.innerHTML =
+        pending.length
+          ? pending.map(renderListing).join("")
+          : emptyMessage("🎉 Abhi koi pending property nahi hai.");
+
+      // Approved
+
+      approvedList.innerHTML =
+        approved.length
+          ? approved.map(renderListing).join("")
+          : emptyMessage("Abhi koi approved property nahi hai.");
+
+      // Rejected
+
+      rejectedList.innerHTML =
+        rejected.length
+          ? rejected.map(renderListing).join("")
+          : emptyMessage("Abhi koi rejected property nahi hai.");
+
+      // All
+
+      const sorted = [...listings].sort((a, b) => {
+
+        const aTime = a.createdAt?.toMillis?.() || 0;
+
+        const bTime = b.createdAt?.toMillis?.() || 0;
+
+        return bTime - aTime;
+
+      });
+
+      allList.innerHTML =
+        sorted.length
+          ? sorted.map(renderListing).join("")
+          : emptyMessage("Abhi koi property listing nahi hai.");
+
+    }
+
+
+    // ========================================================
+    // LOAD LISTINGS
+    // ========================================================
+
+    async function loadListings() {
+
+      try {
+
+        errorBox.style.display = "none";
+
+        const snapshot = await F.getDocs(
+          F.collection(db, "listings")
+        );
+
+        listings = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        renderAll();
+
+      } catch (error) {
+
+        console.error("Load listings error:", error);
+
+        errorBox.textContent =
+          error.code === "permission-denied"
+            ? "Permission denied. Admin Firestore Rules check karein."
+            : (error.message || "Properties load nahi ho paayi.");
+
+        errorBox.style.display = "block";
+
+      }
+
+    }
+
+
+    // ========================================================
+    // APPROVE PROPERTY
+    // ========================================================
+
+    async function approveProperty(id) {
+
+      if (busyIds.has(id)) {
+        return;
+      }
+
+      const listing = listings.find(item => item.id === id);
+
+      if (!listing) {
+        alert("Property nahi mili.");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `Kya aap "${listing.title || "property"}" ko approve karna chahte hain?`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      busyIds.add(id);
+
+      try {
+
+        const listingRef = F.doc(db, "listings", id);
+
+        await F.updateDoc(listingRef, {
+          status: "approved",
+          approvedAt: F.serverTimestamp(),
+          // Was A.currentUser (does not exist on A); auth.currentUser is correct.
+          approvedBy: auth.currentUser?.uid || null
+        });
+
+        alert("✅ Property approved successfully.");
+
+        await loadListings();
+
+      } catch (error) {
+
+        console.error("Approve error:", error);
+
+        alert(
+          error.code === "permission-denied"
+            ? "Permission denied. Firestore Rules check karein."
+            : (error.message || "Property approve nahi hui.")
+        );
+
+      } finally {
+
+        busyIds.delete(id);
+
+      }
+
+    }
+
+
+    // ========================================================
+    // REJECT PROPERTY
+    // ========================================================
+
+    async function rejectProperty(id) {
+
+      if (busyIds.has(id)) {
+        return;
+      }
+
+      const listing = listings.find(item => item.id === id);
+
+      if (!listing) {
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `Kya aap "${listing.title || "property"}" ko reject karna chahte hain?`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      busyIds.add(id);
+
+      try {
+
+        const listingRef = F.doc(db, "listings", id);
+
+        await F.updateDoc(listingRef, {
+          status: "rejected",
+          rejectedAt: F.serverTimestamp(),
+          // Was A.currentUser (does not exist on A); auth.currentUser is correct.
+          rejectedBy: auth.currentUser?.uid || null
+        });
+
+        alert("Property rejected.");
+
+        await loadListings();
+
+      } catch (error) {
+
+        console.error("Reject error:", error);
+
+        alert(
+          error.code === "permission-denied"
+            ? "Permission denied. Firestore Rules check karein."
+            : (error.message || "Property reject nahi hui.")
+        );
+
+      } finally {
+
+        busyIds.delete(id);
+
+      }
+
+    }
+
+
+    // ========================================================
+    // ACTION BUTTONS
+    // ========================================================
+
+    document.addEventListener("click", event => {
+
+      const button = event.target.closest("[data-action]");
+
+      if (!button) {
+        return;
+      }
+
+      const action = button.dataset.action;
+
+      const id = button.dataset.id;
+
+      if (action === "approve") {
+        approveProperty(id);
+      }
+
+      if (action === "reject") {
+        rejectProperty(id);
+      }
+
+    });
+
+
+    // ========================================================
+    // TABS
+    // ========================================================
+
+    document.querySelectorAll(".tab").forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        document
+          .querySelectorAll(".tab")
+          .forEach(tab => tab.classList.remove("active"));
+
+        button.classList.add("active");
+
+        document
+          .querySelectorAll(".section")
+          .forEach(section => section.classList.remove("active"));
+
+        const tab = button.dataset.tab;
+
+        document
+          .getElementById(tab + "Section")
+          .classList.add("active");
+
+      });
+
+    });
+
+
+    // ========================================================
+    // ADMIN AUTH CHECK
+    // ========================================================
+
+    A.onAuthStateChanged(auth, async user => {
+
+      if (!user) {
+
+        window.location.href = "./login.html?next=admin.html";
+
+        return;
+
+      }
+
+      try {
+
+        const role = await getRole(user);
+
+        if (role !== "admin") {
+
+          errorBox.textContent =
+            "Access denied. Sirf Admin ye page open kar sakta hai.";
+
+          errorBox.style.display = "block";
+
+          return;
+
+        }
+
+        // Navbar
+
+        renderChrome(user, role);
+
+        // Load data
+
+        await loadListings();
+
+        // Auto refresh
+
+        setInterval(loadListings, 15000);
+
+      } catch (error) {
+
+        console.error("Admin auth error:", error);
+
+        errorBox.textContent = "Admin verification failed.";
+
+        errorBox.style.display = "block";
+
+      }
+
+    });
+
+  </script>
+
+</body>
+
+</html>

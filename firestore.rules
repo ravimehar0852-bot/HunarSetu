@@ -2,153 +2,1115 @@ rules_version = '2';
 
 service cloud.firestore {
 
-  match /databases/{db}/documents {
+  match /databases/{database}/documents {
 
-    // ================================
+    // =========================================================
     // HELPER FUNCTIONS
-    // ================================
+    // =========================================================
 
-    function signed() {
+    function signedIn() {
       return request.auth != null;
     }
 
-    function admin() {
-      return signed() &&
-        request.auth.token.admin == true;
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.admin == true;
     }
 
-    function me(uid) {
-      return signed() &&
-        request.auth.uid == uid;
+    function isOwner(uid) {
+      return signedIn()
+        && request.auth.uid == uid;
+    }
+
+    function isStudent() {
+      return signedIn()
+        && request.auth.token.admin != true
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.role == 'customer';
+    }
+
+    function isHouseOwner() {
+      return signedIn()
+        && request.auth.token.admin != true
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.role == 'worker';
     }
 
 
-    // ================================
+    // =========================================================
     // USERS
-    // ================================
+    // =========================================================
 
     match /users/{uid} {
 
       // User can read own profile.
-      // Admin can read all user profiles.
-      allow read: if me(uid) || admin();
+      // Admin can read all profiles.
+      allow read:
+        if isOwner(uid) || isAdmin();
 
 
-      // Customer / worker can create own account.
+      // New account.
+      //
+      // Existing app currently uses:
+      // customer = Student/Tenant
+      // worker   = House Owner
       allow create:
-        if me(uid)
+        if isOwner(uid)
         && request.resource.data.role in ['customer', 'worker']
         && request.resource.data.keys().hasOnly([
+          'uid',
           'name',
           'email',
           'role',
+          'emailVerified',
           'createdAt'
         ]);
 
 
-      // User can update own profile,
-      // but cannot change protected role/status fields.
+      // User can update own profile.
+      // Role cannot be changed from frontend.
       allow update:
-        if me(uid)
+        if isOwner(uid)
         && request.resource.data.role == resource.data.role
-        && !request.resource.data.diff(resource.data)
+        && request.resource.data.uid == resource.data.uid
+        && !request.resource.data
+          .diff(resource.data)
           .affectedKeys()
           .hasAny([
-            'role',
-            'status',
-            'verified'
+            'role'
           ]);
 
 
-      // Nobody can delete user profiles.
-      allow delete: if admin();
+      // Only admin can delete.
+      allow delete:
+        if isAdmin();
     }
 
 
-    // ================================
+    // =========================================================
     // SERVICE CATEGORIES
-    // ================================
+    // =========================================================
+    //
+    // Kept temporarily so the existing application does not break
+    // while the project is being converted to room/property types.
+    //
 
     match /serviceCategories/{id} {
 
       allow read: if true;
 
-      allow write: if admin();
+      allow write: if isAdmin();
     }
 
 
-    // ================================
-    // WORKER PROFILES
-    // ================================
+    // =========================================================
+    // OLD WORKER PROFILES
+    // =========================================================
+    //
+    // Kept temporarily for migration compatibility.
+    //
+    // Existing worker = future House Owner.
+    //
 
-    match /workerProfiles/{id} {
+    match /workerProfiles/{uid} {
 
-      // Approved workers are publicly readable.
-      // Worker can read own profile.
-      // Admin can read all profiles.
+      // Approved profiles are public.
+      // Owner can read own profile.
+      // Admin can read all.
       allow read:
-        if resource.data.status == 'approved'
-        || me(id)
-        || admin();
+        if isAdmin()
+        || isOwner(uid)
+        || resource.data.status == 'approved';
 
 
-      // Worker can create ONLY their own profile.
-      // New profiles must start as pending.
+      // Owner creates own application.
+      // Application must start as pending.
       allow create:
-        if me(id)
-        && request.resource.data.status == 'pending'
-        && request.resource.data.uid == request.auth.uid;
+        if isHouseOwner()
+        && isOwner(uid)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'pending';
 
 
-      // Admin can approve/reject/update workers.
+      // Admin can update anything.
       //
-      // Worker can update their own profile,
-      // but cannot change approval status.
+      // Owner can update own profile but cannot change status.
       allow update:
-        if admin()
+        if isAdmin()
         || (
-          me(id)
+          isOwner(uid)
           && request.resource.data.uid == resource.data.uid
           && request.resource.data.status == resource.data.status
         );
 
 
-      // Worker profile cannot be deleted by worker.
-      // Admin can delete if needed.
       allow delete:
-        if admin();
+        if isAdmin();
     }
 
 
-    // ================================
-    // BOOKINGS
-    // ================================
+    // =========================================================
+    // NEW PROPERTY / ROOM LISTINGS
+    // =========================================================
+    //
+    // Future main collection:
+    //
+    // listings/{listingId}
+    //
+    // One owner can create MULTIPLE listings.
+    //
 
-    match /bookings/{id} {
+    match /listings/{listingId} {
 
-      // Customer, worker involved in booking,
-      // or admin can read booking.
+      // -------------------------------------------------------
+      // READ
+      // -------------------------------------------------------
+      //
+      // Approved + available listings can be publicly viewed.
+      //
+      // Owner can read own listing.
+      // Admin can read everything.
+      //
       allow read:
-        if signed()
-        && (
-          resource.data.customerId == request.auth.uid
-          || resource.data.workerId == request.auth.uid
-          || admin()
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.ownerUid == request.auth.uid
+        )
+        || (
+          resource.data.status == 'approved'
+          && resource.data.availability in [
+            'available',
+            'reserved'
+          ]
         );
 
 
-      // Booking creation/update will be handled
-      // by the existing application / future Cloud Functions.
-      allow write: if false;
+      // -------------------------------------------------------
+      // CREATE
+      // -------------------------------------------------------
+      //
+      // House owner creates listing.
+      //
+      // Admin approval is required later.
+      //
+      allow create:
+        if isHouseOwner()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.availability == 'available';
+
+
+      // -------------------------------------------------------
+      // UPDATE
+      // -------------------------------------------------------
+      //
+      // Owner can edit own listing.
+      //
+      // Owner CANNOT:
+      // - approve own listing
+      // - change ownerUid
+      // - fake admin approval
+      //
+      // Admin can update everything.
+      //
+
+      allow update:
+        if isAdmin()
+        || (
+          isHouseOwner()
+          && resource.data.ownerUid == request.auth.uid
+          && request.resource.data.ownerUid == resource.data.ownerUid
+          && request.resource.data.status == resource.data.status
+        );
+
+
+      // -------------------------------------------------------
+      // DELETE
+      // -------------------------------------------------------
+      //
+      // Owner can delete own listing.
+      // Admin can delete any listing.
+      //
+
+      allow delete:
+        if isAdmin()
+        || (
+          isHouseOwner()
+          && resource.data.ownerUid == request.auth.uid
+        );
     }
 
 
-    // ================================
+    // =========================================================
+    // ENQUIRIES / VISIT REQUESTS
+    // =========================================================
+    //
+    // Future student -> owner enquiry system.
+    //
+    // Example:
+    //
+    // Student:
+    // "I want to visit this room."
+    //
+    // Owner:
+    // "Visit confirmed."
+    //
+
+    match /enquiries/{enquiryId} {
+
+      // Student, owner involved, or admin can read.
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && (
+            resource.data.studentUid == request.auth.uid
+            || resource.data.ownerUid == request.auth.uid
+          )
+        );
+
+
+      // Student creates enquiry.
+      allow create:
+        if isStudent()
+        && request.resource.data.studentUid == request.auth.uid
+        && request.resource.data.ownerUid is string
+        && request.resource.data.listingId is string
+        && request.resource.data.status == 'pending';
+
+
+      // Student and owner can update only their own side.
+      //
+      // Detailed status transition validation will be added
+      // when the enquiry UI is connected.
+      //
+      allow update:
+        if isAdmin()
+        || (
+          signedIn()
+          && (
+            resource.data.studentUid == request.auth.uid
+            || resource.data.ownerUid == request.auth.uid
+          )
+          && request.resource.data.studentUid == resource.data.studentUid
+          && request.resource.data.ownerUid == resource.data.ownerUid
+          && request.resource.data.listingId == resource.data.listingId
+        );
+
+
+      allow delete:
+        if isAdmin()
+        || (
+          isStudent()
+          && resource.data.studentUid == request.auth.uid
+        );
+    }
+
+
+    // =========================================================
+    // NOTIFICATIONS
+    // =========================================================
+    //
+    // Real in-app notification system.
+    //
+    // notifications/{notificationId}
+    //
+
+    match /notifications/{notificationId} {
+
+      // User can read own notifications.
+      // Admin can read all.
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+        );
+
+
+      // Notifications should normally be created by
+      // trusted backend/admin.
+      //
+      // Frontend users cannot create arbitrary notifications.
+      //
+      allow create:
+        if isAdmin();
+
+
+      // User can mark own notification as read.
+      // Admin can update everything.
+      allow update:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly([
+              'read'
+            ])
+        );
+
+
+      allow delete:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+        );
+    }
+
+
+    // =========================================================
+    // FAVORITES
+    // =========================================================
+    //
+    // Student saved rooms.
+    //
+    // favorites/{favoriteId}
+    //
+
+    match /favorites/{favoriteId} {
+
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.studentUid == request.auth.uid
+        );
+
+
+      allow create:
+        if isStudent()
+        && request.resource.data.studentUid == request.auth.uid
+        && request.resource.data.listingId is string;
+
+
+      allow delete:
+        if isAdmin()
+        || (
+          isStudent()
+          && resource.data.studentUid == request.auth.uid
+        );
+
+
+      allow update:
+        if false;
+    }
+
+
+    // =========================================================
+    // REPORTS
+    // =========================================================
+    //
+    // Student can report suspicious property/owner.
+    //
+
+    match /reports/{reportId} {
+
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.reporterUid == request.auth.uid
+        );
+
+
+      allow create:
+        if signedIn()
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.targetType in [
+          'listing',
+          'owner',
+          'user'
+        ]
+        && request.resource.data.status == 'open';
+
+
+      // Only admin manages report status.
+      allow update:
+        if isAdmin();
+
+
+      allow delete:
+        if isAdmin();
+    }
+
+
+    // =========================================================
+    // FCM / PUSH NOTIFICATION TOKENS
+    // =========================================================
+    //
+    // Later Firebase Cloud Messaging integration.
+    //
+    // fcmTokens/{tokenId}
+    //
+
+    match /fcmTokens/{tokenId} {
+
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+        );
+
+
+      allow create:
+        if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+
+
+      allow update:
+        if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId;
+
+
+      allow delete:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+        );
+    }
+
+
+    // =========================================================
+    // OLD BOOKINGS
+    // =========================================================
+    //
+    // Existing project compatibility.
+    //
+    // This collection will later be replaced by enquiries.
+    //
+
+    match /bookings/{bookingId} {
+
+      // Customer / worker / admin can read their booking.
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && (
+            resource.data.customerUid == request.auth.uid
+            || resource.data.workerUid == request.auth.uid
+          )
+        );
+
+
+      // Existing booking creation.
+      //
+      // Customer creates only their own booking.
+      //
+      allow create:
+        if signedIn()
+        && request.resource.data.customerUid == request.auth.uid
+        && request.resource.data.workerUid is string
+        && request.resource.data.status == 'pending';
+
+
+      // Worker can change allowed booking workflow fields.
+      //
+      // Admin can update booking.
+      //
+      allow update:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.workerUid == request.auth.uid
+          && request.resource.data.customerUid == resource.data.customerUid
+          && request.resource.data.workerUid == resource.data.workerUid
+          && request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly([
+              'status',
+              'acceptedAt',
+              'startedAt',
+              'completionRequestedAt',
+              'reviewRequestedAt'
+            ])
+        );
+
+
+      allow delete:
+        if isAdmin();
+    }
+
+
+    // =========================================================
     // DENY EVERYTHING ELSE
-    // ================================
+    // =========================================================
 
     match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}rules_version = '2';
 
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+
+    // =========================================================
+    // HELPER FUNCTIONS
+    // =========================================================
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.admin == true;
+    }
+
+    function isOwner(uid) {
+      return signedIn()
+        && request.auth.uid == uid;
+    }
+
+    function isStudent() {
+      return signedIn()
+        && request.auth.token.admin != true
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.role == 'customer';
+    }
+
+    function isHouseOwner() {
+      return signedIn()
+        && request.auth.token.admin != true
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.role == 'worker';
+    }
+
+
+    // =========================================================
+    // USERS
+    // =========================================================
+
+    match /users/{uid} {
+
+      // User can read own profile.
+      // Admin can read all profiles.
+      allow read:
+        if isOwner(uid) || isAdmin();
+
+
+      // New account.
+      //
+      // Existing app currently uses:
+      // customer = Student/Tenant
+      // worker   = House Owner
+      allow create:
+        if isOwner(uid)
+        && request.resource.data.role in ['customer', 'worker']
+        && request.resource.data.keys().hasOnly([
+          'uid',
+          'name',
+          'email',
+          'role',
+          'emailVerified',
+          'createdAt'
+        ]);
+
+
+      // User can update own profile.
+      // Role cannot be changed from frontend.
+      allow update:
+        if isOwner(uid)
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.uid == resource.data.uid
+        && !request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasAny([
+            'role'
+          ]);
+
+
+      // Only admin can delete.
+      allow delete:
+        if isAdmin();
+    }
+
+
+    // =========================================================
+    // SERVICE CATEGORIES
+    // =========================================================
+    //
+    // Kept temporarily so the existing application does not break
+    // while the project is being converted to room/property types.
+    //
+
+    match /serviceCategories/{id} {
+
+      allow read: if true;
+
+      allow write: if isAdmin();
+    }
+
+
+    // =========================================================
+    // OLD WORKER PROFILES
+    // =========================================================
+    //
+    // Kept temporarily for migration compatibility.
+    //
+    // Existing worker = future House Owner.
+    //
+
+    match /workerProfiles/{uid} {
+
+      // Approved profiles are public.
+      // Owner can read own profile.
+      // Admin can read all.
+      allow read:
+        if isAdmin()
+        || isOwner(uid)
+        || resource.data.status == 'approved';
+
+
+      // Owner creates own application.
+      // Application must start as pending.
+      allow create:
+        if isHouseOwner()
+        && isOwner(uid)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'pending';
+
+
+      // Admin can update anything.
+      //
+      // Owner can update own profile but cannot change status.
+      allow update:
+        if isAdmin()
+        || (
+          isOwner(uid)
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.status == resource.data.status
+        );
+
+
+      allow delete:
+        if isAdmin();
+    }
+
+
+    // =========================================================
+    // NEW PROPERTY / ROOM LISTINGS
+    // =========================================================
+    //
+    // Future main collection:
+    //
+    // listings/{listingId}
+    //
+    // One owner can create MULTIPLE listings.
+    //
+
+    match /listings/{listingId} {
+
+      // -------------------------------------------------------
+      // READ
+      // -------------------------------------------------------
+      //
+      // Approved + available listings can be publicly viewed.
+      //
+      // Owner can read own listing.
+      // Admin can read everything.
+      //
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.ownerUid == request.auth.uid
+        )
+        || (
+          resource.data.status == 'approved'
+          && resource.data.availability in [
+            'available',
+            'reserved'
+          ]
+        );
+
+
+      // -------------------------------------------------------
+      // CREATE
+      // -------------------------------------------------------
+      //
+      // House owner creates listing.
+      //
+      // Admin approval is required later.
+      //
+      allow create:
+        if isHouseOwner()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.availability == 'available';
+
+
+      // -------------------------------------------------------
+      // UPDATE
+      // -------------------------------------------------------
+      //
+      // Owner can edit own listing.
+      //
+      // Owner CANNOT:
+      // - approve own listing
+      // - change ownerUid
+      // - fake admin approval
+      //
+      // Admin can update everything.
+      //
+
+      allow update:
+        if isAdmin()
+        || (
+          isHouseOwner()
+          && resource.data.ownerUid == request.auth.uid
+          && request.resource.data.ownerUid == resource.data.ownerUid
+          && request.resource.data.status == resource.data.status
+        );
+
+
+      // -------------------------------------------------------
+      // DELETE
+      // -------------------------------------------------------
+      //
+      // Owner can delete own listing.
+      // Admin can delete any listing.
+      //
+
+      allow delete:
+        if isAdmin()
+        || (
+          isHouseOwner()
+          && resource.data.ownerUid == request.auth.uid
+        );
+    }
+
+
+    // =========================================================
+    // ENQUIRIES / VISIT REQUESTS
+    // =========================================================
+    //
+    // Future student -> owner enquiry system.
+    //
+    // Example:
+    //
+    // Student:
+    // "I want to visit this room."
+    //
+    // Owner:
+    // "Visit confirmed."
+    //
+
+    match /enquiries/{enquiryId} {
+
+      // Student, owner involved, or admin can read.
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && (
+            resource.data.studentUid == request.auth.uid
+            || resource.data.ownerUid == request.auth.uid
+          )
+        );
+
+
+      // Student creates enquiry.
+      allow create:
+        if isStudent()
+        && request.resource.data.studentUid == request.auth.uid
+        && request.resource.data.ownerUid is string
+        && request.resource.data.listingId is string
+        && request.resource.data.status == 'pending';
+
+
+      // Student and owner can update only their own side.
+      //
+      // Detailed status transition validation will be added
+      // when the enquiry UI is connected.
+      //
+      allow update:
+        if isAdmin()
+        || (
+          signedIn()
+          && (
+            resource.data.studentUid == request.auth.uid
+            || resource.data.ownerUid == request.auth.uid
+          )
+          && request.resource.data.studentUid == resource.data.studentUid
+          && request.resource.data.ownerUid == resource.data.ownerUid
+          && request.resource.data.listingId == resource.data.listingId
+        );
+
+
+      allow delete:
+        if isAdmin()
+        || (
+          isStudent()
+          && resource.data.studentUid == request.auth.uid
+        );
+    }
+
+
+    // =========================================================
+    // NOTIFICATIONS
+    // =========================================================
+    //
+    // Real in-app notification system.
+    //
+    // notifications/{notificationId}
+    //
+
+    match /notifications/{notificationId} {
+
+      // User can read own notifications.
+      // Admin can read all.
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+        );
+
+
+      // Notifications should normally be created by
+      // trusted backend/admin.
+      //
+      // Frontend users cannot create arbitrary notifications.
+      //
+      allow create:
+        if isAdmin();
+
+
+      // User can mark own notification as read.
+      // Admin can update everything.
+      allow update:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly([
+              'read'
+            ])
+        );
+
+
+      allow delete:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+        );
+    }
+
+
+    // =========================================================
+    // FAVORITES
+    // =========================================================
+    //
+    // Student saved rooms.
+    //
+    // favorites/{favoriteId}
+    //
+
+    match /favorites/{favoriteId} {
+
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.studentUid == request.auth.uid
+        );
+
+
+      allow create:
+        if isStudent()
+        && request.resource.data.studentUid == request.auth.uid
+        && request.resource.data.listingId is string;
+
+
+      allow delete:
+        if isAdmin()
+        || (
+          isStudent()
+          && resource.data.studentUid == request.auth.uid
+        );
+
+
+      allow update:
+        if false;
+    }
+
+
+    // =========================================================
+    // REPORTS
+    // =========================================================
+    //
+    // Student can report suspicious property/owner.
+    //
+
+    match /reports/{reportId} {
+
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.reporterUid == request.auth.uid
+        );
+
+
+      allow create:
+        if signedIn()
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.targetType in [
+          'listing',
+          'owner',
+          'user'
+        ]
+        && request.resource.data.status == 'open';
+
+
+      // Only admin manages report status.
+      allow update:
+        if isAdmin();
+
+
+      allow delete:
+        if isAdmin();
+    }
+
+
+    // =========================================================
+    // FCM / PUSH NOTIFICATION TOKENS
+    // =========================================================
+    //
+    // Later Firebase Cloud Messaging integration.
+    //
+    // fcmTokens/{tokenId}
+    //
+
+    match /fcmTokens/{tokenId} {
+
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+        );
+
+
+      allow create:
+        if signedIn()
+        && request.resource.data.userId == request.auth.uid;
+
+
+      allow update:
+        if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId;
+
+
+      allow delete:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.userId == request.auth.uid
+        );
+    }
+
+
+    // =========================================================
+    // OLD BOOKINGS
+    // =========================================================
+    //
+    // Existing project compatibility.
+    //
+    // This collection will later be replaced by enquiries.
+    //
+
+    match /bookings/{bookingId} {
+
+      // Customer / worker / admin can read their booking.
+      allow read:
+        if isAdmin()
+        || (
+          signedIn()
+          && (
+            resource.data.customerUid == request.auth.uid
+            || resource.data.workerUid == request.auth.uid
+          )
+        );
+
+
+      // Existing booking creation.
+      //
+      // Customer creates only their own booking.
+      //
+      allow create:
+        if signedIn()
+        && request.resource.data.customerUid == request.auth.uid
+        && request.resource.data.workerUid is string
+        && request.resource.data.status == 'pending';
+
+
+      // Worker can change allowed booking workflow fields.
+      //
+      // Admin can update booking.
+      //
+      allow update:
+        if isAdmin()
+        || (
+          signedIn()
+          && resource.data.workerUid == request.auth.uid
+          && request.resource.data.customerUid == resource.data.customerUid
+          && request.resource.data.workerUid == resource.data.workerUid
+          && request.resource.data.diff(resource.data)
+            .affectedKeys()
+            .hasOnly([
+              'status',
+              'acceptedAt',
+              'startedAt',
+              'completionRequestedAt',
+              'reviewRequestedAt'
+            ])
+        );
+
+
+      allow delete:
+        if isAdmin();
+    }
+
+
+    // =========================================================
+    // DENY EVERYTHING ELSE
+    // =========================================================
+
+    match /{document=**} {
       allow read, write: if false;
     }
   }

@@ -57,7 +57,11 @@ const db = getFirestore(app);
 const A = {
   getAuth,
   onAuthStateChanged,
-  signOut
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile
 };
 
 

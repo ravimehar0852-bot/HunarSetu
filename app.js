@@ -9,7 +9,11 @@ import { initializeApp } from
 import {
   getAuth,
   onAuthStateChanged,
-  signOut
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile
 } from
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
